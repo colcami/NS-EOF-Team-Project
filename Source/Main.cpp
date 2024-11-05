@@ -8,6 +8,13 @@
 
 #include "ParallelManagers/PetscParallelConfiguration.hpp"
 
+#include <fenv.h>
+
+void enableFloatingPointExceptions() {
+    // Enable FE_DIVBYZERO, FE_OVERFLOW, FE_UNDERFLOW, and FE_INVALID exceptions
+    feenableexcept(FE_DIVBYZERO | FE_OVERFLOW | FE_UNDERFLOW | FE_INVALID);
+}
+
 int main(int argc, char* argv[]) {
   spdlog::set_level(spdlog::level::info);
 
@@ -25,7 +32,9 @@ int main(int argc, char* argv[]) {
   MPI_Comm_rank(PETSC_COMM_WORLD, &rank);
   spdlog::info("Rank: {}, Nproc: {}", rank, nproc);
   //----------------------------------------------------
-
+  #ifndef NDEBUG
+  enableFloatingPointExceptions();
+  #endif
 
 #ifdef ENABLE_SINGLE_PRECISION
   spdlog::warn(

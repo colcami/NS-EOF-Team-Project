@@ -74,9 +74,10 @@ void Stencils::MaxUStencil::cellMaxValue(FlowField& flowField, int i, int j, int
 }
 
 void Stencils::MaxUStencil::reset() {
-  maxValues_[0] = 0;
-  maxValues_[1] = 0;
-  maxValues_[2] = 0;
+  double eps = 10e-16; 
+  maxValues_[0] = eps;
+  maxValues_[1] = eps;
+  maxValues_[2] = eps;
 }
 
 const RealType* Stencils::MaxUStencil::getMaxValues() const { return maxValues_; }
