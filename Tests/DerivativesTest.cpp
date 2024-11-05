@@ -61,7 +61,23 @@ TEST_CASE("Test derivatives", "[single-file]") {
 
     "du2dx:     " << Stencils::du2dx(lv, parameters, lm) << std::endl
     << "dv2dy:     " << Stencils::dv2dy(lv, parameters, lm) << std::endl
-    << "dw2dz:     " << Stencils::dw2dz(lv, parameters, lm) << std::endl;
+    << "dw2dz:     " << Stencils::dw2dz(lv, parameters, lm) << std::endl
+
+    // add double derivatives 
+    // u
+    << "d2udx2:      " << Stencils::d2udx2(lv, lm) << std::endl
+    << "d2udy2:      " << Stencils::d2udy2(lv, lm) << std::endl
+    << "d2udz2:      " << Stencils::d2udz2(lv, lm) << std::endl
+    // v
+    << "d2vdx2:      " << Stencils::d2vdx2(lv, lm) << std::endl
+    << "d2vdy2:      " << Stencils::d2vdy2(lv, lm) << std::endl
+    << "d2vdz2:      " << Stencils::d2vdz2(lv, lm) << std::endl
+    // w
+    << "d2wdx2:      " << Stencils::d2wdx2(lv, lm) << std::endl
+    << "d2wdy2:      " << Stencils::d2wdy2(lv, lm) << std::endl
+    << "d2wdz2:      " << Stencils::d2wdz2(lv, lm) << std::endl;
+
+
 
   spdlog::info(ss.str());
 

@@ -575,20 +575,94 @@ namespace Stencils {
     return tmp2;
   }
 
+  // adding the second derivatives
+  // derivative of u
+  inline RealType d2udx2(const RealType* const lv, const RealType* const lm) {
+    const int index0 = mapd(0, 0, 0, 0);
+    const int index1 = mapd(1, 0, 0, 0);
+    const int index2 = mapd(-1, 0, 0, 0);
+    const int dx = mapd(0, 0, 0, 0);
+    return (lv[index1] - 2*lv[index0] + lv[index2]) / (lm[dx] * lm[dx]);
+  }
+
+  inline RealType d2udy2(const RealType* const lv, const RealType* const lm) {
+    const int index0 = mapd(0, 0, 0, 0);
+    const int index1 = mapd(0, 1, 0, 0);
+    const int index2 = mapd(0, -1, 0, 0);
+    const int dy = mapd(0, 0, 0, 1);
+    return (lv[index1] - 2*lv[index0] + lv[index2]) / (lm[dy] * lm[dy]);
+  }
+
+  inline RealType d2udz2(const RealType* const lv, const RealType* const lm) {
+    const int index0 = mapd(0, 0, 0, 0);
+    const int index1 = mapd(0, 0, 1, 0);
+    const int index2 = mapd(0, 0, -1, 0);
+    const int dz = mapd(0, 0, 0, 2);
+    return (lv[index1] - 2*lv[index0] + lv[index2]) / (lm[dz] * lm[dz]);
+  }
+  // derivative of v
+  inline RealType d2vdx2(const RealType* const lv, const RealType* const lm) {
+    const int index0 = mapd(0, 0, 0, 1);
+    const int index1 = mapd(1, 0, 0, 1);
+    const int index2 = mapd(-1, 0, 0, 1);
+    const int dx = mapd(0, 0, 0, 0);
+    return (lv[index1] - 2*lv[index0] + lv[index2]) / (lm[dx] * lm[dx]);
+  }
+
+  inline RealType d2vdy2(const RealType* const lv, const RealType* const lm) {
+    const int index0 = mapd(0, 0, 0, 1);
+    const int index1 = mapd(0, 1, 0, 1);
+    const int index2 = mapd(0, -1, 0, 1);
+    const int dy = mapd(0, 0, 0, 1);
+    return (lv[index1] - 2*lv[index0] + lv[index2]) / (lm[dy] * lm[dy]);
+  }
+  
+  inline RealType d2vdz2(const RealType* const lv, const RealType* const lm) {
+    const int index0 = mapd(0, 0, 0, 1);
+    const int index1 = mapd(0, 0, 1, 1);
+    const int index2 = mapd(0, 0, -1, 1);
+    const int dz = mapd(0, 0, 0, 2);
+    return (lv[index1] - 2*lv[index0] + lv[index2]) / (lm[dz] * lm[dz]);
+  }
+  // derivative of w
+  inline RealType d2wdx2(const RealType* const lv, const RealType* const lm) {
+    const int index0 = mapd(0, 0, 0, 2);
+    const int index1 = mapd(1, 0, 0, 2);
+    const int index2 = mapd(-1, 0, 0, 2);
+    const int dx = mapd(0, 0, 0, 0);
+    return (lv[index1] - 2*lv[index0] + lv[index2]) / (lm[dx] * lm[dx]);
+  }
+
+  inline RealType d2wdy2(const RealType* const lv, const RealType* const lm) {
+    const int index0 = mapd(0, 0, 0, 2);
+    const int index1 = mapd(0, 1, 0, 2);
+    const int index2 = mapd(0, -1, 0, 2);
+    const int dy = mapd(0, 0, 0, 1);
+    return (lv[index1] - 2*lv[index0] + lv[index2]) / (lm[dy] * lm[dy]);
+  }
+  
+  inline RealType d2wdz2(const RealType* const lv, const RealType* const lm) {
+    const int index0 = mapd(0, 0, 0, 2);
+    const int index1 = mapd(0, 0, 1, 2);
+    const int index2 = mapd(0, 0, -1, 2);
+    const int dz = mapd(0, 0, 0, 2);
+    return (lv[index1] - 2*lv[index0] + lv[index2]) / (lm[dz] * lm[dz]);
+  }
+
   inline RealType computeF2D(
     const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt
   ) {
     // TODO WS1
     return localVelocity[mapd(0, 0, 0, 0)]
-        + dt * (-du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize) + parameters.environment.gx);
+        + dt * (1.0/parameters.flow.Re*(d2udx2(localVelocity, localMeshsize) + d2udy2(localVelocity, localMeshsize)) -du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize) + parameters.environment.gx);
   }
 
   inline RealType computeG2D(
     const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt
   ) {
     // TODO WS1
-    return localVelocity[mapd(0, 0, 0, 0)]
-        + dt * (- du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize) + parameters.environment.gx);
+    return localVelocity[mapd(0, 0, 0, 1)]
+        + dt * (1.0/parameters.flow.Re*(d2vdx2(localVelocity, localMeshsize) + d2vdy2(localVelocity, localMeshsize))- dv2dy(localVelocity, parameters, localMeshsize) - duvdx(localVelocity, parameters, localMeshsize) + parameters.environment.gy);
   }
 
   inline RealType computeF3D(
@@ -596,7 +670,7 @@ namespace Stencils {
   ) {
     // TODO WS1
     return localVelocity[mapd(0, 0, 0, 0)]
-        + dt * (-du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize)
+        + dt * (1.0/parameters.flow.Re*(d2udx2(localVelocity, localMeshsize) + d2udy2(localVelocity, localMeshsize) + d2udz2(localVelocity, localMeshsize)) -du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize)
             - duwdz(localVelocity, parameters, localMeshsize) + parameters.environment.gx);
   }
 
@@ -605,7 +679,7 @@ namespace Stencils {
   ) {
     // TODO WS1
     return localVelocity[mapd(0, 0, 0, 1)]
-        + dt * (-dv2dy(localVelocity, parameters, localMeshsize) - duvdx(localVelocity, parameters, localMeshsize)
+        + dt * (1.0/parameters.flow.Re*(d2vdx2(localVelocity, localMeshsize) + d2vdy2(localVelocity, localMeshsize) + d2vdz2(localVelocity, localMeshsize)) -dv2dy(localVelocity, parameters, localMeshsize) - duvdx(localVelocity, parameters, localMeshsize)
             - dvwdz(localVelocity, parameters, localMeshsize) + parameters.environment.gy);
   }
 
@@ -614,7 +688,7 @@ namespace Stencils {
   ) {
     // TODO WS1
     return localVelocity[mapd(0, 0, 0, 2)]
-        + dt * (-dw2dz(localVelocity, parameters, localMeshsize) - duwdx(localVelocity, parameters, localMeshsize)
+        + dt * (1.0/parameters.flow.Re*(d2wdx2(localVelocity, localMeshsize) + d2wdy2(localVelocity, localMeshsize) + d2wdz2(localVelocity, localMeshsize)) -dw2dz(localVelocity, parameters, localMeshsize) - duwdx(localVelocity, parameters, localMeshsize)
             - dvwdy(localVelocity, parameters, localMeshsize) + parameters.environment.gz);
   }
 
