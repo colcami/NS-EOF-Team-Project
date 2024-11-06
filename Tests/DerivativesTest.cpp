@@ -28,7 +28,7 @@ TEST_CASE("Test derivatives", "[single-file]") {
     for (int j = -1; j < 2; j++) {
       for (int k = -1; k < 2; k++) {
         for (int c = 0; c < 3; c++) {
-          lv[Stencils::mapd(i, j, k, c)] = 1;
+          lv[Stencils::mapd(i, j, k, c)] = 6;
         }
       }
     }
@@ -38,9 +38,18 @@ TEST_CASE("Test derivatives", "[single-file]") {
     REQUIRE(lv[i]);
   }
 
-  lv[Stencils::mapd(1, 0, 0, 0)]  = 3;
-  lv[Stencils::mapd(0, 0, 0, 0)]  = 2;
-  lv[Stencils::mapd(-1, 0, 0, 0)] = 1;
+  // u
+  lv[Stencils::mapd(1, 0, 0, 0)]  = 3; // u i+1 = 3
+  lv[Stencils::mapd(0, 0, 0, 0)]  = 2; // u i j = 2
+  lv[Stencils::mapd(-1, 0, 0, 0)] = 1; // u i-1 = 1
+
+  lv[Stencils::mapd(0, 1, 0, 1)]  = 4; // v j+1 = 4
+  lv[Stencils::mapd(0, 0, 0, 1)]  = 2; // v i j = 2
+  lv[Stencils::mapd(0, -1, 0, 1)] = 0; // v j-1 = 0
+
+  lv[Stencils::mapd(0, 0, 1, 2)]  = 5; // w k+1 = 5
+  lv[Stencils::mapd(0, 0, 0, 2)]  = 2; // w ijk = 2
+  lv[Stencils::mapd(0, 0, -1, 2)] = -1; //w k-1 = -1
 
   std::stringstream ss;
 
@@ -61,10 +70,15 @@ TEST_CASE("Test derivatives", "[single-file]") {
 
     "du2dx:     " << Stencils::du2dx(lv, parameters, lm) << std::endl
     << "dv2dy:     " << Stencils::dv2dy(lv, parameters, lm) << std::endl
-    << "dw2dz:     " << Stencils::dw2dz(lv, parameters, lm) << std::endl
+    << "dw2dz:     " << Stencils::dw2dz(lv, parameters, lm) << std::endl;
 
     // add double derivatives 
     // u
+    lm[Stencils::mapd(1, 0, 0, 0)] = 5; // dx+1 
+    lm[Stencils::mapd(0, 1, 0, 1)] = 5; // dy+1
+    lm[Stencils::mapd(0, 0, 1, 2)] = 5; // dz+1
+
+    ss
     << "d2udx2:      " << Stencils::d2udx2(lv, lm) << std::endl
     << "d2udy2:      " << Stencils::d2udy2(lv, lm) << std::endl
     << "d2udz2:      " << Stencils::d2udz2(lv, lm) << std::endl
