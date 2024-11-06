@@ -74,7 +74,7 @@ void Stencils::MaxUStencil::cellMaxValue(FlowField& flowField, int i, int j, int
 }
 
 void Stencils::MaxUStencil::reset() {
-  double eps = 10e-16; 
+  const double eps = 10e-16; 
   maxValues_[0] = eps;
   maxValues_[1] = eps;
   maxValues_[2] = eps;
