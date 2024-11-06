@@ -581,8 +581,8 @@ namespace Stencils {
     const RealType u0 = lv[mapd(0, 0, 0, 0)]; // uij
     const RealType u1 = lv[mapd(1, 0, 0, 0)]; // ui+1
     const RealType u2 = lv[mapd(-1, 0, 0, 0)]; // ui-1
-    const int dx_n = lm[mapd(0, 0, 0, 0)]; // dx-
-    const int dx_p = lm[mapd(1, 0, 0, 0)]; // dx+
+    const RealType dx_n = lm[mapd(0, 0, 0, 0)]; // dx-
+    const RealType dx_p = lm[mapd(1, 0, 0, 0)]; // dx+
     return 2*( u1/(dx_p*(dx_p + dx_n)) - u0/(dx_n*dx_p) + u2/(dx_n*(dx_p + dx_n)));
   }
 
@@ -590,8 +590,8 @@ namespace Stencils {
     const RealType u0 = lv[mapd(0, 0, 0, 0)]; // uij
     const RealType u1 = lv[mapd(0, 1, 0, 0)]; // uj+1
     const RealType u2 = lv[mapd(0, -1, 0, 0)]; // uj-1
-    const int dy_n = lm[mapd(0, 0, 0, 1)]; // dy-
-    const int dy_p = lm[mapd(0, 1, 0, 1)]; // dy+
+    const RealType dy_n = lm[mapd(0, 0, 0, 1)]; // dy-
+    const RealType dy_p = lm[mapd(0, 1, 0, 1)]; // dy+
     return 2*( u1/(dy_p*(dy_p + dy_n)) - u0/(dy_n*dy_p) + u2/(dy_n*(dy_p + dy_n)));
   }
 
@@ -599,8 +599,8 @@ namespace Stencils {
     const RealType u0 = lv[mapd(0, 0, 0, 0)]; // uijk
     const RealType u1 = lv[mapd(0, 0, 1, 0)]; // uk+1
     const RealType u2 = lv[mapd(0, 0, -1, 0)]; //uk-1
-    const int dz_n = lm[mapd(0, 0, 0, 2)]; // dz-
-    const int dz_p = lm[mapd(0, 0, 1, 2)]; //dz+
+    const RealType dz_n = lm[mapd(0, 0, 0, 2)]; // dz-
+    const RealType dz_p = lm[mapd(0, 0, 1, 2)]; //dz+
     return 2*( u1/(dz_p*(dz_p + dz_n)) - u0/(dz_n*dz_p) + u2/(dz_n*(dz_p + dz_n)));
   }
   // derivative of v
@@ -608,8 +608,8 @@ namespace Stencils {
     const RealType v0 = lv[mapd(0, 0, 0, 1)]; // vij
     const RealType v1 = lv[mapd(1, 0, 0, 1)]; // vi+1
     const RealType v2 = lv[mapd(-1, 0, 0, 1)]; // vi-1
-    const int dx_n = lm[mapd(0, 0, 0, 0)]; //dx-
-    const int dx_p = lm[mapd(1, 0, 0, 0)]; //dx+
+    const RealType dx_n = lm[mapd(0, 0, 0, 0)]; //dx-
+    const RealType dx_p = lm[mapd(1, 0, 0, 0)]; //dx+
     return 2*( v1/(dx_p*(dx_p + dx_n)) - v0/(dx_n*dx_p) + v2/(dx_n*(dx_p + dx_n)));
   }
 
@@ -617,8 +617,8 @@ namespace Stencils {
     const RealType v0 = lv[mapd(0, 0, 0, 1)]; // vij
     const RealType v1 = lv[mapd(0, 1, 0, 1)]; // vj+1
     const RealType v2 = lv[mapd(0, -1, 0, 1)]; // vj-1
-    const int dy_n = lm[mapd(0, 0, 0, 1)]; //dy-
-    const int dy_p = lm[mapd(0, 1, 0, 1)]; //dy+
+    const RealType dy_n = lm[mapd(0, 0, 0, 1)]; //dy-
+    const RealType dy_p = lm[mapd(0, 1, 0, 1)]; //dy+
     return 2*( v1/(dy_p*(dy_p + dy_n)) - v0/(dy_n*dy_p) + v2/(dy_n*(dy_p + dy_n)));
   }
   
@@ -626,8 +626,8 @@ namespace Stencils {
     const RealType v0 = lv[mapd(0, 0, 0, 1)]; // vijk
     const RealType v1 = lv[mapd(0, 0, 1, 1)]; // vk+1
     const RealType v2 = lv[mapd(0, 0, -1, 1)]; // vk-1
-    const int dz_n = lm[mapd(0, 0, 0, 2)]; //dz-
-    const int dz_p = lm[mapd(0, 0, 1, 2)]; //dz+
+    const RealType dz_n = lm[mapd(0, 0, 0, 2)]; //dz-
+    const RealType dz_p = lm[mapd(0, 0, 1, 2)]; //dz+
     return 2*( v1/(dz_p*(dz_p + dz_n)) - v0/(dz_n*dz_p) + v2/(dz_n*(dz_p + dz_n)));
   }
   // derivative of w
@@ -635,8 +635,8 @@ namespace Stencils {
     const RealType w0 = lv[mapd(0, 0, 0, 2)]; // wijk
     const RealType w1 = lv[mapd(1, 0, 0, 2)]; // wi+1
     const RealType w2 = lv[mapd(-1, 0, 0, 2)]; // wi-1
-    const int dx_n = lm[mapd(0, 0, 0, 0)]; // dx-
-    const int dx_p = lm[mapd(1, 0, 0, 0)]; // dx+
+    const RealType dx_n = lm[mapd(0, 0, 0, 0)]; // dx-
+    const RealType dx_p = lm[mapd(1, 0, 0, 0)]; // dx+
     return 2*( w1/(dx_p*(dx_p + dx_n)) - w0/(dx_n*dx_p) + w2/(dx_n*(dx_p + dx_n)));
   }
 
@@ -644,8 +644,8 @@ namespace Stencils {
     const RealType w0 = lv[mapd(0, 0, 0, 2)]; // wijk
     const RealType w1 = lv[mapd(0, 1, 0, 2)]; // wj+1
     const RealType w2 = lv[mapd(0, -1, 0, 2)]; // wj-1
-    const int dy_n = lm[mapd(0, 0, 0, 1)]; // dy-
-    const int dy_p = lm[mapd(0, 1, 0, 1)]; // dy+
+    const RealType dy_n = lm[mapd(0, 0, 0, 1)]; // dy-
+    const RealType dy_p = lm[mapd(0, 1, 0, 1)]; // dy+
     return 2*( w1/(dy_p*(dy_p + dy_n)) - w0/(dy_n*dy_p) + w2/(dy_n*(dy_p + dy_n)));
   }
   
@@ -653,8 +653,8 @@ namespace Stencils {
     const RealType w0 = lv[mapd(0, 0, 0, 2)]; // wijk
     const RealType w1 = lv[mapd(0, 0, 1, 2)]; // wk+1
     const RealType w2 = lv[mapd(0, 0, -1, 2)]; // wk-1
-    const int dz_n = lm[mapd(0, 0, 0, 2)]; // dz-
-    const int dz_p = lm[mapd(0, 0, 1, 2)]; // dz+
+    const RealType dz_n = lm[mapd(0, 0, 0, 2)]; // dz-
+    const RealType dz_p = lm[mapd(0, 0, 1, 2)]; // dz+
     return 2*( w1/(dz_p*(dz_p + dz_n)) - w0/(dz_n*dz_p) + w2/(dz_n*(dz_p + dz_n)));
   }
 
