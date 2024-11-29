@@ -1,0 +1,41 @@
+#pragma once
+
+#include "Definitions.hpp"
+#include "FieldStencil.hpp"
+#include "FlowField.hpp"
+#include "Parameters.hpp"
+#include <sstream>
+#include <fstream>
+
+namespace Stencils {
+class VTKWallDistanceStencil : public FieldStencil<FlowField> {
+private:
+    bool          written_;               
+    std::string   prefix_;                
+    std::ofstream ofile_; 
+                    
+    std::stringstream wallDistanceStream_; 
+    std::stringstream viscosityStream_;  
+
+    void writeVTKHeader(std::ostream& file) const;
+    void writePoints(std::ostream& file, RealType simulationTime) const;
+
+    /** Open the output file
+     * @param timeStep Current time step
+     * @param simulationTime Current simulation time
+     */
+    void openFile(int timeStep, RealType simulationTime);
+
+    /** Close the output file after writing */
+    void closeFile();
+
+public:
+    VTKWallDistanceStencil(const Parameters& parameters);
+    ~VTKWallDistanceStencil() override = default;
+
+    void apply(FlowField& flowField, int i, int j) override;
+    void apply(FlowField& flowField, int i, int j, int k) override;
+
+    void write(FlowField& flowField, int timeStep, RealType simulationTime);
+};
+}
