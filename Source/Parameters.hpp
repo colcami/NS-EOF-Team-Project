@@ -137,7 +137,7 @@ public:
 class TurbulenceModelParameters {
 public:
   std::string type;    //! Type of turbulence model (e.g., "mixing-length")
-  RealType kappa = 0;  //! von Kármán constant
+  RealType kappa = 0.41;  //! von Kármán constant
   RealType c0 = 0;     //! Constant for delta scaling
   std::string deltaType; //! Delta computation type ("none", "laminar", "turbulent")
 };
