@@ -660,15 +660,15 @@ namespace Stencils {
 
   //New turbulence model derivatives for non uniform grids
   //du/dx2
- inline RealType diffusiveUx2(const RealType* const lv, const RealType* const lm, const Parameters& parameters) {
+ inline RealType diffusiveUx2(FlowField& flowField, const RealType* const lv, const RealType* const lm, const Parameters& parameters, int i, int j, int k) {
     const RealType u0 = lv[mapd(0, 0, 0, 0)];
     const RealType u1 = lv[mapd(1, 0, 0, 0)];
     const RealType u2 = lv[mapd(-1, 0, 0, 0)];
     const RealType dx_n = lm[mapd(0, 0, 0, 0)];
     const RealType dx_p = lm[mapd(1, 0, 0, 0)];
 
-    const RealType nu_star_n = 1.0 / parameters.flow.Re + parameters.nu_t_.getScalar(i - 1, j, k);
-    const RealType nu_star_p = 1.0 / parameters.flow.Re + parameters.nu_t_.getScalar(i + 1, j, k);
+    const RealType nu_star_n = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i - 1, j, k);
+    const RealType nu_star_p = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i + 1, j, k);
     
     return 2.0 * (
         nu_star_p * (u1 - u0) / (dx_p * (dx_p + dx_n)) -
@@ -678,15 +678,15 @@ namespace Stencils {
 
 
  //du/dy2
- inline RealType diffusiveUy2(const RealType* const lv, const RealType* const lm, const Parameters& parameters) {
+ inline RealType diffusiveUy2(FlowField& flowField,const RealType* const lv, const RealType* const lm, const Parameters& parameters, int i, int j, int k) {
     const RealType u0 = lv[mapd(0, 0, 0, 0)];
     const RealType u1 = lv[mapd(0, 1, 0, 0)];
     const RealType u2 = lv[mapd(0, -1, 0, 0)];
     const RealType dy_n = lm[mapd(0, 0, 0, 1)];
     const RealType dy_p = lm[mapd(0, 1, 0, 1)];
 
-    const RealType nu_star_n = 1.0 / parameters.flow.Re + parameters.nu_t_.getScalar(i, j - 1, k);
-    const RealType nu_star_p = 1.0 / parameters.flow.Re + parameters.nu_t_.getScalar(i, j + 1, k);
+    const RealType nu_star_n = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i, j - 1, k);
+    const RealType nu_star_p = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i, j + 1, k);
 
     return 2.0 * (
         nu_star_p * (u1 - u0) / (dy_p * (dy_p + dy_n)) -
@@ -696,15 +696,15 @@ namespace Stencils {
 
  
  //du/dz2
- inline RealType diffusiveUz2(const RealType* const lv, const RealType* const lm, const Parameters& parameters) {
+ inline RealType diffusiveUz2(FlowField& flowField ,const RealType* const lv, const RealType* const lm, const Parameters& parameters, int i, int j, int k) {
     const RealType u0 = lv[mapd(0, 0, 0, 0)];
     const RealType u1 = lv[mapd(0, 0, 1, 0)];
     const RealType u2 = lv[mapd(0, 0, -1, 0)];
     const RealType dz_n = lm[mapd(0, 0, 0, 2)];
     const RealType dz_p = lm[mapd(0, 0, 1, 2)];
 
-    const RealType nu_star_n = 1.0 / parameters.flow.Re + parameters.nu_t_.getScalar(i, j, k - 1);
-    const RealType nu_star_p = 1.0 / parameters.flow.Re + parameters.nu_t_.getScalar(i, j, k + 1);
+    const RealType nu_star_p = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i, j, k + 1);
+    const RealType nu_star_n = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i, j, k - 1);
 
     return 2.0 * (
         nu_star_p * (u1 - u0) / (dz_p * (dz_p + dz_n)) -
