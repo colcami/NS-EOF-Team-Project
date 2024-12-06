@@ -61,7 +61,7 @@ void Stencils::ObstacleStencil::apply(FlowField& flowField, int i, int j) {
   }
 // --- New Minimal Distance Calculation ---
     if (minimalDistances2D.empty()) {
-        initializeDistances2D(flowField.getSizeX(), flowField.getSizeY());
+        initializeDistances2D(flowField.getNx(), flowField.getNy());
     }
 
     if ((obstacle & OBSTACLE_SELF) == 1) {
@@ -73,7 +73,7 @@ void Stencils::ObstacleStencil::apply(FlowField& flowField, int i, int j) {
                 int nj = j + dj;
 
                 // Check bounds
-                if (ni >= 0 && ni < flowField.getSizeX() && nj >= 0 && nj < flowField.getSizeY()) {
+                if (ni >= 0 && ni < flowField.getNx() && nj >= 0 && nj < flowField.getNy()) {
                     if ((flowField.getFlags().getValue(ni, nj) & OBSTACLE_SELF) == 1) {
                         const RealType dx = parameters_.meshsize->getDx(i, j);
                         const RealType dy = parameters_.meshsize->getDy(i, j);
@@ -148,7 +148,7 @@ void Stencils::ObstacleStencil::apply(FlowField& flowField, int i, int j, int k)
   }
 // Minimal distance computation
     if (minimalDistances3D.empty()) {
-        initializeDistances3D(flowField.getSizeX(), flowField.getSizeY(), flowField.getSizeZ());
+        initializeDistances3D(flowField.getNx(), flowField.getNy(), flowField.getNz());
     }
 
     if ((obstacle & OBSTACLE_SELF) == 1) {
@@ -161,9 +161,9 @@ void Stencils::ObstacleStencil::apply(FlowField& flowField, int i, int j, int k)
                     int nj = j + dj;
                     int nk = k + dk;
 
-                    if (ni >= 0 && ni < flowField.getSizeX() &&
-                        nj >= 0 && nj < flowField.getSizeY() &&
-                        nk >= 0 && nk < flowField.getSizeZ()) {
+                    if (ni >= 0 && ni < flowField.getNx() &&
+                        nj >= 0 && nj < flowField.getNy() &&
+                        nk >= 0 && nk < flowField.getNz()) {
                         if ((flowField.getFlags().getValue(ni, nj, nk) & OBSTACLE_SELF) == 1) {
                             const RealType dx = parameters_.meshsize->getDx(i, j, k);
                             const RealType dy = parameters_.meshsize->getDy(i, j, k);

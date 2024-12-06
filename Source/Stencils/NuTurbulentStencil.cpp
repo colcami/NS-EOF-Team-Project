@@ -1,7 +1,9 @@
 #include "StdAfx.hpp"
-#include "TurbulentViscosity.hpp"
+#include "NuTurbulentStencil.hpp"
 #include "StencilFunctions.hpp"
 #include <cmath>
+
+namespace Stencils{
 
 NuTurbulentStencil::NuTurbulentStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {}
@@ -20,7 +22,7 @@ RealType NuTurbulentStencil::computeShearRate(const RealType* lv, const RealType
 }
 
 // Interpolate velocity to the cell center
-RealType NuTurbulentStencil::interpolateVelocityToCellCenter(const FlowField& flowField, int i, int j, int k) const {
+RealType NuTurbulentStencil::interpolateVelocityToCellCenter(FlowField& flowField, int i, int j, int k) const {
     RealType u = 0.5 * (flowField.getVelocity().getVector(i, j, k)[0] +
                         flowField.getVelocity().getVector(i - 1, j, k)[0]);
     RealType v = 0.5 * (flowField.getVelocity().getVector(i, j, k)[1] +
@@ -107,4 +109,4 @@ void NuTurbulentStencil::apply(FlowField& flowField, int i, int j, int k) {
     flowField.getTurbulentViscosity().getScalar(i, j, k) = nuT;
 }
 
-
+} // namespace Stencils

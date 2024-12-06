@@ -5,7 +5,7 @@
 #include <cmath>
 #include <algorithm>
 
-
+namespace Stencil{
 // Constructor
 WallDistanceStencil::WallDistanceStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {
@@ -130,3 +130,5 @@ void WallDistanceStencil::apply(FlowField& flowField, int i, int j, int k) {
     // Store the result in the scalar field `h`
     flowField.getWallDistance().getScalar(i, j, k) = distance;
 }
+
+} // namespace Stencil

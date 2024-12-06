@@ -12,6 +12,7 @@
  * This stencil computes the turbulent viscosity based on the mixing length model,
  * which considers local wall distance, boundary layer thickness, and shear rate.
  */
+namespace Stencils{
 class NuTurbulentStencil : public FieldStencil<FlowField> {
 private:
     const RealType kappa_ = 0.41; //! von Kármán constant
@@ -19,7 +20,7 @@ private:
     /** Computes the shear rate tensor magnitude S_ij S_ij */
     RealType computeShearRate(const RealType* lv, const RealType* lm) const;
 
-    RealType interpolateVelocityToCellCenter(const FlowField& flowField, int i, int j, int k) const;
+    RealType interpolateVelocityToCellCenter(FlowField& flowField, int i, int j, int k) const;
     
     /** Computes the boundary layer thickness delta */
     RealType computeBoundaryLayerThickness(RealType x, RealType U, RealType nu) const;
@@ -34,3 +35,5 @@ public:
     void apply(FlowField& flowField, int i, int j) override;       // For 2D
     void apply(FlowField& flowField, int i, int j, int k) override; // For 3D
 };
+
+}// namespace Stencils
