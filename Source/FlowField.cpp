@@ -39,7 +39,7 @@ FlowField::FlowField(int Nx, int Ny, int Nz):
   RHS_(ScalarField(Nx + 3, Ny + 3, Nz + 3)),
   h_(ScalarField(Nx + 3, Ny + 3, Nz + 3)),
   nu_t_(ScalarField(Nx + 3, Ny + 3, Nz + 3)),
-  nu_star_(ScalarField(Nx + 3, Ny + 3, Nz + 3)){
+  nu_star_(ScalarField(Nx + 3, Ny + 3, Nz + 3)) {
 
   ASSERTION(Nx > 0);
   ASSERTION(Ny > 0);
@@ -72,7 +72,7 @@ FlowField::FlowField(const Parameters& parameters):
   ),
   h_(
     parameters.geometry.dim == 2 ? ScalarField(sizeX_ + 3, sizeY_ + 3) : ScalarField(sizeX_ + 3, sizeY_ + 3, sizeZ_ + 3)
-    ),
+  ),
   nu_t_(
     parameters.geometry.dim == 2 ? ScalarField(sizeX_ + 3, sizeY_ + 3) : ScalarField(sizeX_ + 3, sizeY_ + 3, sizeZ_ + 3)
   ),

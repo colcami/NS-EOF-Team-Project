@@ -27,8 +27,8 @@ private:
   // New turbulence fields
   ScalarField h_;    //! Scalar field for the nearest wall distance
   ScalarField nu_t_; //! Scalar field for the turbulent viscosity
-  ScalarField nu_star_;
-
+  ScalarField nu_star_; //! Scalar field for the total viscosity
+  
 public:
   /** Constructor for the 2D flow field
    *
