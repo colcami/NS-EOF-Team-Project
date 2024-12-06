@@ -8,13 +8,13 @@
 #include <fstream>
 
 namespace Stencils {
-class VTKWallDistanceStencil : public FieldStencil<FlowField> {
+class VTKTurbulentViscosityStencil : public FieldStencil<FlowField> {
 private:
     bool          written_;
     std::string   prefix_;
     std::ofstream ofile_;
 
-    std::stringstream wallDistanceStream_;
+    std::stringstream viscosityStream_;
 
     void writeVTKHeader(std::ostream& file) const;
     void writePoints(std::ostream& file, RealType simulationTime) const;
@@ -23,8 +23,8 @@ private:
     void closeFile();
 
 public:
-    VTKWallDistanceStencil(const Parameters& parameters);
-    ~VTKWallDistanceStencil() override = default;
+    VTKTurbulentViscosityStencil(const Parameters& parameters);
+    ~VTKTurbulentViscosityStencil() override = default;
 
     void apply(FlowField& flowField, int i, int j) override;
     void apply(FlowField& flowField, int i, int j, int k) override;

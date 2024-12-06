@@ -38,6 +38,9 @@
             <vector x="0" y="0" z="0" />
         </back>
     </walls>
+    <boundaryLayer>
+    <type>laminar</type>
+    </boundaryLayer>
     <vtk interval="0.1">ChannelBackwardFacingStep2D</vtk>
     <stdOut interval="0.0001" />
     <parallel numProcessorsX="1" numProcessorsY="1" numProcessorsZ="1" />
