@@ -1,17 +1,20 @@
-#include "StdAfx.hpp"
+/* 
+#include "StdAfx.hpp"      
 #include "TurbulentViscosity.hpp"
 #include "StencilFunctions.hpp"
 #include <cmath>
 #include "WallDistanceStencil.hpp"
+#include "FieldStencil.hpp"
+
+namespace Stencils {
 
 NuTurbulentStencil::NuTurbulentStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {}
 
-// Compute the shear rate tensor magnitude (Sij Sij)
 RealType NuTurbulentStencil::computeShearRate(const RealType* lv, const RealType* lm) const {
     RealType S11 = dudx(lv, lm); // du/dx
     RealType S22 = dvdy(lv, lm); // dv/dy
-    RealType S33 = dwdz(lv, lm); // dw/dz (zero in 2D)
+    RealType S33 = dwdz(lv, lm); // dw/dz
 
     RealType S12 = 0.5 * (dudy(lv, lm) + dvdx(lv, lm)); // (du/dy + dv/dx)
     RealType S13 = 0.5 * (dudz(lv, lm) + dwdx(lv, lm)); // (du/dz + dw/dx)
@@ -20,90 +23,75 @@ RealType NuTurbulentStencil::computeShearRate(const RealType* lv, const RealType
     return std::sqrt(2.0 * (S11 * S11 + S22 * S22 + S33 * S33 + 2.0 * (S12 * S12 + S13 * S13 + S23 * S23)));
 }
 
-// Interpolate velocity to the cell center
 RealType NuTurbulentStencil::interpolateVelocityToCellCenter(const FlowField& flowField, int i, int j, int k) const {
-    RealType u = 0.5 * (flowField.getVelocity().getVector(i, j, k)[0] +
-                        flowField.getVelocity().getVector(i - 1, j, k)[0]);
-    RealType v = 0.5 * (flowField.getVelocity().getVector(i, j, k)[1] +
-                        flowField.getVelocity().getVector(i, j - 1, k)[1]);
-    RealType w = 0.5 * (flowField.getVelocity().getVector(i, j, k)[2] +
-                        flowField.getVelocity().getVector(i, j, k - 1)[2]);
-    return std::sqrt(u * u + v * v + w * w); // Magnitude of velocity at cell center
+    const RealType* velocityHere = flowField.getVelocity().getVector(i, j, k);
+    const RealType* velocityLeft = flowField.getVelocity().getVector(i - 1, j, k);
+    const RealType* velocityDown = flowField.getVelocity().getVector(i, j - 1, k);
+    const RealType* velocityBack = flowField.getVelocity().getVector(i, j, k - 1);
+
+    RealType u = 0.5 * (velocityHere[0] + velocityLeft[0]);
+    RealType v = 0.5 * (velocityHere[1] + velocityDown[1]);
+    RealType w = 0.5 * (velocityHere[2] + velocityBack[2]);
+
+    return std::sqrt(u * u + v * v + w * w);
 }
 
-// Compute the boundary layer thickness delta
-RealType NuTurbulentStencil::computeBoundaryLayerThickness(RealType x, RealType U, RealType Re) const {
+RealType NuTurbulentStencil::computeBoundaryLayerThickness(RealType x, RealType U, RealType nu) const {
     if (x == 0 || U == 0) return 0.0;
 
-    RealType Rex = computeLocalReynoldsNumber(x, U, Re);
-
+    RealType Rex = computeLocalReynoldsNumber(x, U, nu);
     const std::string& deltaType = parameters_.turbulenceModel.boundaryLayerType;
+
     if (deltaType == "laminar") {
-        return 4.91 * x / std::sqrt(Rex); // Blasius laminar boundary layer thickness
+        return 4.91 * x / std::sqrt(Rex);
     } else if (deltaType == "turbulent") {
-        return 0.382 * x / std::pow(Rex, 1.0 / 5.0); // Turbulent flat plate boundary layer thickness
+        return 0.382 * x / std::pow(Rex, 1.0 / 5.0);
     } else {
-        return 0.0; // No boundary layer
+        return 0.0;
     }
 }
 
-// Compute local Reynolds number
-RealType NuTurbulentStencil::computeLocalReynoldsNumber(RealType x, RealType U, RealType Re) const {
-    return U * x * Re; // Re_x = U * x * Re (since nu = 1/Re)
+RealType NuTurbulentStencil::computeLocalReynoldsNumber(RealType x, RealType U, RealType nu) const {
+    return U * x / nu;
 }
 
-// Apply stencil for 3D
 void NuTurbulentStencil::apply(FlowField& flowField, int i, int j, int k) {
-    RealType x = parameters_.meshsize->getPosX(i, j, k); // x-coordinate
-    RealType h = flowField.getWallDistance().getScalar(i, j, k); // Distance to the nearest wall
+    RealType x = parameters_.meshsize->getPosX(i, j, k);
+    RealType h = flowField.getWallDistance().getScalar(i, j, k);
 
-    // Interpolated velocity at the cell center
     RealType U = interpolateVelocityToCellCenter(flowField, i, j, k);
+    RealType nu = 1.0 / parameters_.flow.Re;
 
-    RealType Re = parameters_.flow.Re; // Global Reynolds number
-
-    // Compute boundary layer thickness
-    RealType delta = computeBoundaryLayerThickness(x, U, Re);
-
-    // Compute mixing length scale
+    RealType delta = computeBoundaryLayerThickness(x, U, nu);
     RealType lmScale = std::min(kappa_ * h, parameters_.turbulenceModel.c0 * delta);
 
-    // Compute shear rate
-    const RealType* lv = flowField.getVelocity().getLocalVector(i, j, k);
-    const RealType* lm = flowField.getMeshsize().getLocalMesh(i, j, k);
-    RealType shearRate = computeShearRate(lv, lm);
+    const RealType* lv = flowField.getVelocity().getVector(i, j, k);
+    const RealType* lm = flowField.getMeshsize()->getLocalMesh(i, j, k);
 
-    // Compute turbulent viscosity
+    RealType shearRate = computeShearRate(lv, lm);
     RealType nuT = lmScale * lmScale * shearRate;
 
-    // Store turbulent viscosity
     flowField.getTurbulentViscosity().getScalar(i, j, k) = nuT;
 }
 
-// Apply stencil for 2D
 void NuTurbulentStencil::apply(FlowField& flowField, int i, int j) {
-    RealType x = parameters_.meshsize->getPosX(i, j); // x-coordinate
-    RealType h = flowField.getWallDistance().getScalar(i, j); // Distance to the nearest wall
+    RealType x = parameters_.meshsize->getPosX(i, j);
+    RealType h = flowField.getWallDistance().getScalar(i, j);
 
-    // Interpolated velocity at the cell center
     RealType U = interpolateVelocityToCellCenter(flowField, i, j, 0);
+    RealType nu = 1.0 / parameters_.flow.Re;
 
-    RealType Re = parameters_.flow.Re; // Global Reynolds number
-
-    // Compute boundary layer thickness
-    RealType delta = computeBoundaryLayerThickness(x, U, Re);
-
-    // Compute mixing length scale
+    RealType delta = computeBoundaryLayerThickness(x, U, nu);
     RealType lmScale = std::min(kappa_ * h, parameters_.turbulenceModel.c0 * delta);
 
-    // Compute shear rate
-    const RealType* lv = flowField.getVelocity().getLocalVector(i, j);
-    const RealType* lm = flowField.getMeshsize().getLocalMesh(i, j);
-    RealType shearRate = computeShearRate(lv, lm);
+    const RealType* lv = flowField.getVelocity().getVector(i, j);
+    const RealType* lm = flowField.getMeshsize()->getLocalMesh(i, j);
 
-    // Compute turbulent viscosity
+    RealType shearRate = computeShearRate(lv, lm);
     RealType nuT = lmScale * lmScale * shearRate;
 
-    // Store turbulent viscosity
     flowField.getTurbulentViscosity().getScalar(i, j) = nuT;
 }
+
+} // namespace Stencils
+ */

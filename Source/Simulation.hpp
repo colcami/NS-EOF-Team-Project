@@ -18,8 +18,8 @@
 #include "Stencils/PeriodicBoundaryStencils.hpp"
 #include "Stencils/VelocityStencil.hpp"
 #include "Stencils/VTKStencil.hpp"
-
-
+#include "Stencils/WallDistanceStencil.hpp"
+#include "Stencils/VTKWallDistanceStencil.hpp"
 class Simulation {
 protected:
   Parameters& parameters_;
@@ -46,7 +46,8 @@ protected:
   FieldIterator<FlowField>  velocityIterator_;
   FieldIterator<FlowField>  obstacleIterator_;
 
-
+  Stencils::WallDistanceStencil wallDistanceStencil_;
+  Stencils::VTKWallDistanceStencil vtkWallDistanceStencil_;
   std::unique_ptr<Solvers::LinearSolver> solver_;
 
   virtual void setTimeStep();

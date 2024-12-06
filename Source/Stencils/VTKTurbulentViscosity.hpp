@@ -1,4 +1,4 @@
-#pragma once
+/* #pragma once
 
 #include "Definitions.hpp"
 #include "FieldStencil.hpp"
@@ -32,3 +32,4 @@ public:
     void write(FlowField& flowField, int timeStep, RealType simulationTime);
 };
 }
+ */

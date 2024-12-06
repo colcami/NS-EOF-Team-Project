@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 
+namespace Stencils {
 
 // Constructor
 WallDistanceStencil::WallDistanceStencil(const Parameters& parameters)
@@ -24,10 +25,12 @@ void WallDistanceStencil::detectScenario() {
     stretchY_ = parameters_.geometry.stretchY;
     stretchZ_ = parameters_.geometry.stretchZ;
 
-    if (scenario_ == "backward facing step") {
-        xStep_ = parameters_.backwardFacingStep.xRatio * lengthX_;
-        yStep_ = parameters_.backwardFacingStep.yRatio * lengthY_;
-    } else if (scenario_ != "channel" && scenario_ != "cavity") {
+    if (scenario_ == "channel" && parameters_.bfStep.xRatio > 0.0 && parameters_.bfStep.yRatio > 0.0) {
+        // Backward-facing step in a channel
+        xStep_ = parameters_.bfStep.xRatio * lengthX_;
+        yStep_ = parameters_.bfStep.yRatio * lengthY_;
+        scenario_ = "channelWithStep";
+    } else if (scenario_ != "channel" && scenario_ != "channelWithStep" && scenario_ != "cavity") {
         throw std::runtime_error("Unknown scenario: " + scenario_);
     }
 }
@@ -46,6 +49,34 @@ void WallDistanceStencil::apply(FlowField& flowField, int i, int j) {
         RealType toTopWall = lengthY_ - y;
         distance = std::min(toBottomWall, toTopWall);
 
+    } else if (scenario_ == "channelWithStep") {
+        if (x <= xStep_ && y <= yStep_) {
+            // Inside the step: distance is 0
+            distance = 0.0;
+        } else if (x <= xStep_ && y > yStep_) {
+            // Before the vertical wall of the step
+            RealType toBottomWall = yStep_ - y;
+            RealType toTopWall = y - lengthY_;
+            distance = std::min(std::abs(toBottomWall), std::abs(toTopWall));
+        } else if (x > xStep_ && y <= yStep_) {
+            // After the step: include the vertical wall of the step
+            RealType toBottomWall = y;
+            RealType toVerticalWall = x - xStep_; // Horizontal distance to the vertical wall
+            RealType toTopWall = y - lengthY_;
+            distance = std::min({std::abs(toBottomWall), std::abs(toVerticalWall), std::abs(toTopWall)});
+        } else if(x> xStep_ && y > yStep_ && y<-x + xStep_ +lengthY_  /*&& y< lengthY_ - (lengthY_-yStep_)/2 */) {
+            RealType toVerticalWall = x - xStep_;
+            RealType toBottomWall = yStep_ - y;
+            RealType toTopWall = y - lengthY_;
+            distance = std::sqrt(toBottomWall * toBottomWall + toVerticalWall*toVerticalWall);
+            distance = std::min(std::abs(distance), std::abs(toTopWall));
+        } else {
+            RealType toBottomWall = y;
+            RealType toTopWall = y - lengthY_;
+            distance = std::min(std::abs(toBottomWall), std::abs(toTopWall));
+        }
+        
+
     } else if (scenario_ == "cavity") {
         // Distance to cavity walls
         RealType toLeftWall = x;
@@ -54,21 +85,6 @@ void WallDistanceStencil::apply(FlowField& flowField, int i, int j) {
         RealType toTopWall = lengthY_ - y;
 
         distance = std::min({toLeftWall, toRightWall, toBottomWall, toTopWall});
-
-    } else if (scenario_ == "backward facing step") {
-        if (x < xStep_) {
-            // Before the step: distance to flat bottom wall
-            distance = y;
-        } else {
-            // After the step: compute distances to the raised bottom wall and step edge
-            RealType toBottomWall = std::abs(y - yStep_);
-            RealType toStepEdge = std::sqrt(std::pow(x - xStep_, 2) + std::pow(y - yStep_, 2));
-            distance = std::min(toBottomWall, toStepEdge);
-        }
-
-        // Also consider the top wall
-        RealType toTopWall = lengthY_ - y;
-        distance = std::min(distance, toTopWall);
     }
 
     // Store the result in the scalar field `h`
@@ -95,6 +111,28 @@ void WallDistanceStencil::apply(FlowField& flowField, int i, int j, int k) {
 
         distance = std::min({toBottomWall, toTopWall, toFrontWall, toBackWall});
 
+    } else if (scenario_ == "channelWithStep") {
+        if (x <= xStep_ && y <= yStep_) {
+            // Inside the step: distance is 0
+            distance = 0.0;
+        } else if (x <= xStep_ && y > yStep_) {
+            // Before the vertical wall of the step
+            RealType toBottomWall = y - yStep_;
+            RealType toTopWall = lengthY_ - y;
+            RealType toFrontWall = z;
+            RealType toBackWall = lengthZ_ - z;
+            distance = std::min({toBottomWall, toTopWall, toFrontWall, toBackWall});
+        } else if (x > xStep_) {
+            // After the step: include the vertical wall of the step
+            RealType toBottomWall = y;
+            RealType toVerticalWall = x - xStep_; // Horizontal distance to the vertical wall
+            RealType toTopWall = lengthY_ - y;
+            RealType toFrontWall = z;
+            RealType toBackWall = lengthZ_ - z;
+
+            distance = std::min({toBottomWall, toVerticalWall, toTopWall, toFrontWall, toBackWall});
+        }
+
     } else if (scenario_ == "cavity") {
         // Distance to cavity walls
         RealType toLeftWall = x;
@@ -105,28 +143,10 @@ void WallDistanceStencil::apply(FlowField& flowField, int i, int j, int k) {
         RealType toBackWall = lengthZ_ - z;
 
         distance = std::min({toLeftWall, toRightWall, toBottomWall, toTopWall, toFrontWall, toBackWall});
-
-    } else if (scenario_ == "backward facing step") {
-        if (x < xStep_) {
-            // Before the step: distance to flat bottom wall
-            distance = y;
-        } else {
-            // After the step: compute distances to the raised bottom wall and step edge
-            RealType toBottomWall = std::abs(y - yStep_);
-            RealType toStepEdge = std::sqrt(
-                std::pow(x - xStep_, 2) + std::pow(y - yStep_, 2) + std::pow(z - lengthZ_ / 2, 2)
-            );
-            distance = std::min(toBottomWall, toStepEdge);
-        }
-
-        // Also consider distances to top, front, and back walls
-        RealType toTopWall = lengthY_ - y;
-        RealType toFrontWall = z;
-        RealType toBackWall = lengthZ_ - z;
-
-        distance = std::min({distance, toTopWall, toFrontWall, toBackWall});
     }
 
     // Store the result in the scalar field `h`
     flowField.getWallDistance().getScalar(i, j, k) = distance;
 }
+
+} // namespace Stencils

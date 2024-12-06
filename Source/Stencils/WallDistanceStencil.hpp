@@ -13,6 +13,8 @@
  * This stencil computes the normal distance `h` from the center of each cell to the nearest wall
  * for scenarios like channel, cavity, and backward-facing step.
  */
+namespace Stencils {
+    
 class WallDistanceStencil : public FieldStencil<FlowField> {
 private:
     std::string scenario_; //! Simulation scenario: channel, cavity, or backward-facing step
@@ -29,3 +31,4 @@ public:
     void apply(FlowField& flowField, int i, int j) override;       // For 2D
     void apply(FlowField& flowField, int i, int j, int k) override; // For 3D
 };
+}

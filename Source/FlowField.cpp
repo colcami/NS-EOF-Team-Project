@@ -78,7 +78,7 @@ FlowField::FlowField(const Parameters& parameters):
   ),
   nu_star_(
     parameters.geometry.dim == 2 ? ScalarField(sizeX_ + 3, sizeY_ + 3) : ScalarField(sizeX_ + 3, sizeY_ + 3, sizeZ_ + 3)
-  ), {}
+  ) {}
 
 int FlowField::getNx() const { return sizeX_; }
 

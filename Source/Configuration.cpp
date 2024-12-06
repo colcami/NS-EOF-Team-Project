@@ -398,7 +398,7 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
         //--------------------------------------------------
 // Turbulence parameters
 //--------------------------------------------------
-node = confFile.FirstChildElement()->FirstChildElement("turbulenceModel");
+/* node = confFile.FirstChildElement()->FirstChildElement("turbulenceModel");
 
 if (node == NULL) {
     throw std::runtime_error("Error loading turbulence model parameters");
@@ -412,18 +412,18 @@ tinyxml2::XMLElement* subNode = node->FirstChildElement("parameters");
 if (subNode == NULL) {
     throw std::runtime_error("Missing 'parameters' in turbulenceModel");
 }
-
+ */
 // Read kappa, c0, and deltaType
-readFloatMandatory(parameters.turbulenceModel.kappa, subNode, "kappa");
+/* readFloatMandatory(parameters.turbulenceModel.kappa, subNode, "kappa");
 readFloatMandatory(parameters.turbulenceModel.c0, subNode, "c0");
-readStringMandatory(parameters.turbulenceModel.deltaType, subNode);
+readStringMandatory(parameters.turbulenceModel.boundaryLayerType, subNode); */
 
 // Validate deltaType
-if (parameters.turbulenceModel.deltaType != "none" &&
-    parameters.turbulenceModel.deltaType != "laminar" &&
-    parameters.turbulenceModel.deltaType != "turbulent") {
-    throw std::runtime_error("Invalid deltaType in turbulenceModel");
-}
+/* if (parameters.turbulenceModel.boundaryLayerType != "none" &&
+    parameters.turbulenceModel.boundaryLayerType != "laminar" &&
+    parameters.turbulenceModel.boundaryLayerType != "turbulent") {
+    throw std::runtime_error("Invalid boundaryLayerType in turbulenceModel");
+} */
 
     //------------------------------------------------------
   }
