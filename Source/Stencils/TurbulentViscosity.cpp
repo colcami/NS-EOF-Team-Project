@@ -2,7 +2,6 @@
 #include "TurbulentViscosity.hpp"
 #include "StencilFunctions.hpp"
 #include <cmath>
-#include "WallDistanceStencil.hpp"
 
 NuTurbulentStencil::NuTurbulentStencil(const Parameters& parameters)
     : FieldStencil<FlowField>(parameters) {}
@@ -52,34 +51,6 @@ RealType NuTurbulentStencil::computeLocalReynoldsNumber(RealType x, RealType U, 
     return U * x * Re; // Re_x = U * x * Re (since nu = 1/Re)
 }
 
-// Apply stencil for 3D
-void NuTurbulentStencil::apply(FlowField& flowField, int i, int j, int k) {
-    RealType x = parameters_.meshsize->getPosX(i, j, k); // x-coordinate
-    RealType h = flowField.getWallDistance().getScalar(i, j, k); // Distance to the nearest wall
-
-    // Interpolated velocity at the cell center
-    RealType U = interpolateVelocityToCellCenter(flowField, i, j, k);
-
-    RealType Re = parameters_.flow.Re; // Global Reynolds number
-
-    // Compute boundary layer thickness
-    RealType delta = computeBoundaryLayerThickness(x, U, Re);
-
-    // Compute mixing length scale
-    RealType lmScale = std::min(kappa_ * h, parameters_.turbulenceModel.c0 * delta);
-
-    // Compute shear rate
-    const RealType* lv = flowField.getVelocity().getLocalVector(i, j, k);
-    const RealType* lm = flowField.getMeshsize().getLocalMesh(i, j, k);
-    RealType shearRate = computeShearRate(lv, lm);
-
-    // Compute turbulent viscosity
-    RealType nuT = lmScale * lmScale * shearRate;
-
-    // Store turbulent viscosity
-    flowField.getTurbulentViscosity().getScalar(i, j, k) = nuT;
-}
-
 // Apply stencil for 2D
 void NuTurbulentStencil::apply(FlowField& flowField, int i, int j) {
     RealType x = parameters_.meshsize->getPosX(i, j); // x-coordinate
@@ -104,6 +75,36 @@ void NuTurbulentStencil::apply(FlowField& flowField, int i, int j) {
     // Compute turbulent viscosity
     RealType nuT = lmScale * lmScale * shearRate;
 
-    // Store turbulent viscosity
+    // Store turbulent viscosity //! redo this
     flowField.getTurbulentViscosity().getScalar(i, j) = nuT;
 }
+
+// Apply stencil for 3D
+void NuTurbulentStencil::apply(FlowField& flowField, int i, int j, int k) {
+    RealType x = parameters_.meshsize->getPosX(i, j, k); // x-coordinate
+    RealType h = flowField.getWallDistance().getScalar(i, j, k); // Distance to the nearest wall
+
+    // Interpolated velocity at the cell center
+    RealType U = interpolateVelocityToCellCenter(flowField, i, j, k);
+
+    RealType Re = parameters_.flow.Re; // Global Reynolds number
+
+    // Compute boundary layer thickness
+    RealType delta = computeBoundaryLayerThickness(x, U, Re);
+
+    // Compute mixing length scale
+    RealType lmScale = std::min(kappa_ * h, parameters_.turbulenceModel.c0 * delta);
+
+    // Compute shear rate
+    const RealType* lv = flowField.getVelocity().getLocalVector(i, j, k);
+    const RealType* lm = flowField.getMeshsize().getLocalMesh(i, j, k);
+    RealType shearRate = computeShearRate(lv, lm);
+
+    // Compute turbulent viscosity
+    RealType nuT = lmScale * lmScale * shearRate;
+
+    // Store turbulent viscosity //! redo this
+    flowField.getTurbulentViscosity().getScalar(i, j, k) = nuT;
+}
+
+

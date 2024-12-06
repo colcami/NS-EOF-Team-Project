@@ -19,6 +19,8 @@ private:
     /** Computes the shear rate tensor magnitude S_ij S_ij */
     RealType computeShearRate(const RealType* lv, const RealType* lm) const;
 
+    RealType interpolateVelocityToCellCenter(const FlowField& flowField, int i, int j, int k) const;
+    
     /** Computes the boundary layer thickness delta */
     RealType computeBoundaryLayerThickness(RealType x, RealType U, RealType nu) const;
 
