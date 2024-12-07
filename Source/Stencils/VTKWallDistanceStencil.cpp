@@ -95,7 +95,7 @@ void VTKWallDistanceStencil::openFile(int timeStep, RealType simulationTime) {
     std::replace(scenario.begin(), scenario.end(), ' ', '_');
 
     std::stringstream filename;
-    filename << folder << "/" << prefix_ << "_" << scenario << "_ws2_24_" << parameters_.parallel.rank << "_"
+    filename << folder << "/" << prefix_ << "_" << scenario << "_ws2_83D_" << parameters_.parallel.rank << "_"
              << timeStep << ".vtk";
 
     // Open file

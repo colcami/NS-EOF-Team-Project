@@ -10,7 +10,7 @@ namespace Stencils {
 
 // Constructor
 WallDistanceStencil::WallDistanceStencil(const Parameters& parameters)
-    : FieldStencil<FlowField>(parameters) {
+    : FieldStencil<FlowField>(parameters), dimensions_(parameters.geometry.dim) {
     detectScenario(); // Initialize scenario-specific parameters
 }
 
@@ -36,22 +36,37 @@ void WallDistanceStencil::detectScenario() {
     }
 }
 
-// Apply stencil for 2D cases
+// Apply stencil for 2D or 3D cases
 void WallDistanceStencil::apply(FlowField& flowField, int i, int j) {
-    // Get cell center position
+    if (dimensions_ == 2) {
+        apply2D(flowField, i, j);
+    } else {
+        throw std::runtime_error("Invalid call to 2D apply in 3D simulation.");
+    }
+}
+
+void WallDistanceStencil::apply(FlowField& flowField, int i, int j, int k) {
+    if (dimensions_ == 3) {
+        apply3D(flowField, i, j, k);
+    } else {
+        throw std::runtime_error("Invalid call to 3D apply in 2D simulation.");
+    }
+}
+
+// Apply stencil for 2D cases
+void WallDistanceStencil::apply2D(FlowField& flowField, int i, int j) {
     RealType x = parameters_.meshsize->getPosX(i, j);
     RealType y = parameters_.meshsize->getPosY(i, j);
 
     RealType distance = std::numeric_limits<RealType>::max();
 
     if (scenario_ == "channel") {
-        // Distance to top and bottom walls
         RealType toBottomWall = y;
         RealType toTopWall = lengthY_ - y;
         distance = std::min(toBottomWall, toTopWall);
 
     } else if (scenario_ == "channelWithStep") {
-        if (x <= xStep_ && y <= yStep_) {
+         if (x <= xStep_ && y <= yStep_) {
             // Inside the step: distance is 0
             distance = 0.0;
         } else if (x <= xStep_ && y > yStep_) {
@@ -80,7 +95,6 @@ void WallDistanceStencil::apply(FlowField& flowField, int i, int j) {
         }
 
     } else if (scenario_ == "cavity") {
-        // Distance to cavity walls
         RealType toLeftWall = x;
         RealType toRightWall = lengthX_ - x;
         RealType toBottomWall = y;
@@ -89,13 +103,11 @@ void WallDistanceStencil::apply(FlowField& flowField, int i, int j) {
         distance = std::min({toLeftWall, toRightWall, toBottomWall, toTopWall});
     }
 
-    // Store the result in the scalar field `h`
     flowField.getWallDistance().getScalar(i, j) = distance;
 }
 
 // Apply stencil for 3D cases
-void WallDistanceStencil::apply(FlowField& flowField, int i, int j, int k) {
-    // Get cell center position
+void WallDistanceStencil::apply3D(FlowField& flowField, int i, int j, int k) {
     RealType x = parameters_.meshsize->getPosX(i, j, k);
     RealType y = parameters_.meshsize->getPosY(i, j, k);
     RealType z = parameters_.meshsize->getPosZ(i, j, k);
@@ -103,11 +115,8 @@ void WallDistanceStencil::apply(FlowField& flowField, int i, int j, int k) {
     RealType distance = std::numeric_limits<RealType>::max();
 
     if (scenario_ == "channel") {
-        // Distance to top and bottom walls
         RealType toBottomWall = y;
         RealType toTopWall = lengthY_ - y;
-
-        // Distance to front and back walls
         RealType toFrontWall = z;
         RealType toBackWall = lengthZ_ - z;
 
@@ -125,48 +134,41 @@ void WallDistanceStencil::apply(FlowField& flowField, int i, int j, int k) {
             RealType toBackWall = lengthZ_ - z;
             distance = std::min({std::abs(toBottomWall), std::abs(toTopWall), std::abs(toFrontWall), std::abs(toBackWall)});
         } else if (x > xStep_ && y <= yStep_) {
-            // After the step: distances to bottom wall, vertical step wall, and others
+            // After the step: include the vertical wall of the step
             RealType toBottomWall = y;
             RealType toVerticalWall = x - xStep_; // Horizontal distance to the vertical wall
             RealType toTopWall = lengthY_ - y;
             RealType toFrontWall = z;
             RealType toBackWall = lengthZ_ - z;
-
-            distance = std::min({std::abs(toBottomWall), std::abs(toVerticalWall), std::abs(toTopWall),
-                                 std::abs(toFrontWall), std::abs(toBackWall)});
+            distance = std::min({std::abs(toBottomWall), std::abs(toVerticalWall), std::abs(toTopWall), std::abs(toFrontWall), std::abs(toBackWall)});
         } else if (x > xStep_ && y > yStep_ && y < -x + xStep_ + lengthY_) {
-            // After the step: diagonal distance to the corner of the step
-            RealType toBottomWall = y - yStep_;
+            // Diagonal distance to the step corner
             RealType toVerticalWall = x - xStep_;
+            RealType toBottomWall = y - yStep_;
             RealType toDiagonalStep = std::sqrt(toBottomWall * toBottomWall + toVerticalWall * toVerticalWall);
             RealType toTopWall = lengthY_ - y;
             RealType toFrontWall = z;
             RealType toBackWall = lengthZ_ - z;
-
             distance = std::min({std::abs(toDiagonalStep), std::abs(toTopWall), std::abs(toFrontWall), std::abs(toBackWall)});
         } else {
-            // General case: top and bottom walls
+            // General case: distance to top and bottom walls
             RealType toBottomWall = y;
             RealType toTopWall = lengthY_ - y;
             RealType toFrontWall = z;
             RealType toBackWall = lengthZ_ - z;
-
             distance = std::min({std::abs(toBottomWall), std::abs(toTopWall), std::abs(toFrontWall), std::abs(toBackWall)});
         }
 
     } else if (scenario_ == "cavity") {
-        // Distance to cavity walls
         RealType toLeftWall = x;
         RealType toRightWall = lengthX_ - x;
         RealType toBottomWall = y;
-        RealType toTopWall = lengthY_ - y;
         RealType toFrontWall = z;
         RealType toBackWall = lengthZ_ - z;
 
-        distance = std::min({toLeftWall, toRightWall, toBottomWall, toTopWall, toFrontWall, toBackWall});
+        distance = std::min({toLeftWall, toRightWall, toBottomWall, toFrontWall, toBackWall});
     }
 
-    // Store the result in the scalar field `h`
     flowField.getWallDistance().getScalar(i, j, k) = distance;
 }
 

@@ -9,7 +9,7 @@
     <solver gamma="0.5" />
     <geometry dim="2"
       lengthX="1.0" lengthY="1.0" lengthZ="1.0"
-      sizeX="20" sizeY="10" sizeZ="20"
+      sizeX="100" sizeY="100" sizeZ="20"
     >
       <mesh>uniform</mesh>
     </geometry>
