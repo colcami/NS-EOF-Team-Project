@@ -3,19 +3,19 @@
 namespace Stencils {
 
 VTKTurbulentViscosityStencil::VTKTurbulentViscosityStencil(const Parameters& parameters)
-    : FieldStencil<FlowField>(parameters), written_(false), prefix_("turbulentViscosity") {}
+    : FieldStencil<TurbulentFlowField>(parameters), written_(false), prefix_("turbulentViscosity") {}
 
-void VTKTurbulentViscosityStencil::apply(FlowField& flowField, int i, int j) {
+void VTKTurbulentViscosityStencil::apply(TurbulentFlowField& flowField, int i, int j) {
     RealType nuT = flowField.getTurbulentViscosity().getScalar(i, j);
     viscosityStream_ << nuT << "\n";
 }
 
-void VTKTurbulentViscosityStencil::apply(FlowField& flowField, int i, int j, int k) {
+void VTKTurbulentViscosityStencil::apply(TurbulentFlowField& flowField, int i, int j, int k) {
     RealType nuT = flowField.getTurbulentViscosity().getScalar(i, j, k);
     viscosityStream_ << nuT << "\n";
 }
 
-void VTKTurbulentViscosityStencil::write(FlowField& flowField, int timeStep, RealType simulationTime) {
+void VTKTurbulentViscosityStencil::write(TurbulentFlowField& flowField, int timeStep, RealType simulationTime) {
     openFile(timeStep, simulationTime);
 
     writeVTKHeader(ofile_);
@@ -56,5 +56,4 @@ void VTKTurbulentViscosityStencil::closeFile() {
     }
 }
 
-}
- */
+} //namespace Stencil

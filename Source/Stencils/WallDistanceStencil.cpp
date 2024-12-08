@@ -10,9 +10,7 @@ namespace Stencils {
 
 // Constructor
 WallDistanceStencil::WallDistanceStencil(const Parameters& parameters)
-    : FieldStencil<FlowField>(parameters), dimensions_(parameters.geometry.dim) {
-    detectScenario(); // Initialize scenario-specific parameters
-}
+    : FieldStencil<TurbulentFlowField>(parameters) {}
 
 // Detect the simulation scenario
 void WallDistanceStencil::detectScenario() {
@@ -37,24 +35,7 @@ void WallDistanceStencil::detectScenario() {
 }
 
 // Apply stencil for 2D or 3D cases
-void WallDistanceStencil::apply(FlowField& flowField, int i, int j) {
-    if (dimensions_ == 2) {
-        apply2D(flowField, i, j);
-    } else {
-        throw std::runtime_error("Invalid call to 2D apply in 3D simulation.");
-    }
-}
-
-void WallDistanceStencil::apply(FlowField& flowField, int i, int j, int k) {
-    if (dimensions_ == 3) {
-        apply3D(flowField, i, j, k);
-    } else {
-        throw std::runtime_error("Invalid call to 3D apply in 2D simulation.");
-    }
-}
-
-// Apply stencil for 2D cases
-void WallDistanceStencil::apply2D(FlowField& flowField, int i, int j) {
+void WallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j) {
     RealType x = parameters_.meshsize->getPosX(i, j);
     RealType y = parameters_.meshsize->getPosY(i, j);
 
@@ -106,8 +87,7 @@ void WallDistanceStencil::apply2D(FlowField& flowField, int i, int j) {
     flowField.getWallDistance().getScalar(i, j) = distance;
 }
 
-// Apply stencil for 3D cases
-void WallDistanceStencil::apply3D(FlowField& flowField, int i, int j, int k) {
+void WallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j, int k) {
     RealType x = parameters_.meshsize->getPosX(i, j, k);
     RealType y = parameters_.meshsize->getPosY(i, j, k);
     RealType z = parameters_.meshsize->getPosZ(i, j, k);

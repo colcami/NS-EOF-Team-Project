@@ -1,14 +1,15 @@
-/* #pragma once
+#pragma once
 
 #include "Definitions.hpp"
 #include "FieldStencil.hpp"
 #include "FlowField.hpp"
 #include "Parameters.hpp"
+#include "TurbulentFlowField.hpp"
 #include <sstream>
 #include <fstream>
 
 namespace Stencils {
-class VTKTurbulentViscosityStencil : public FieldStencil<FlowField> {
+class VTKTurbulentViscosityStencil : public FieldStencil<TurbulentFlowField> {
 private:
     bool          written_;
     std::string   prefix_;
@@ -26,10 +27,9 @@ public:
     VTKTurbulentViscosityStencil(const Parameters& parameters);
     ~VTKTurbulentViscosityStencil() override = default;
 
-    void apply(FlowField& flowField, int i, int j) override;
-    void apply(FlowField& flowField, int i, int j, int k) override;
+    void apply(TurbulentFlowField& flowField, int i, int j) override;
+    void apply(TurbulentFlowField& flowField, int i, int j, int k) override;
 
-    void write(FlowField& flowField, int timeStep, RealType simulationTime);
+    void write(TurbulentFlowField& flowField, int timeStep, RealType simulationTime);
 };
 }
- */

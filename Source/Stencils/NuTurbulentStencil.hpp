@@ -5,6 +5,7 @@
 #include "Parameters.hpp"
 #include "StencilFunctions.hpp"
 #include "WallDistanceStencil.hpp"
+#include "TurbulentFlowField.hpp"
 
 
 /** Stencil for computing turbulent viscosity (nuT) using Prandtl's mixing length model.
@@ -13,14 +14,12 @@
  * which considers local wall distance, boundary layer thickness, and shear rate.
  */
 namespace Stencils{
-class NuTurbulentStencil : public FieldStencil<FlowField> {
+class NuTurbulentStencil : public FieldStencil<TurbulentFlowField> {
 private:
-    const RealType kappa_ = 0.41; //! von Kármán constant
-
     /** Computes the shear rate tensor magnitude S_ij S_ij */
-    RealType computeShearRate(const RealType* lv, const RealType* lm) const;
+    // RealType computeShearRate(const RealType* lv, const RealType* lm) const;
 
-    RealType interpolateVelocityToCellCenter(FlowField& flowField, int i, int j, int k) const;
+    // RealType interpolateVelocityToCellCenter(TurbulentFlowField& flowField, int i, int j, int k) const;
     
     /** Computes the boundary layer thickness delta */
     RealType computeBoundaryLayerThickness(RealType x, RealType U, RealType nu) const;
@@ -32,8 +31,8 @@ public:
     NuTurbulentStencil(const Parameters& parameters);
     ~NuTurbulentStencil() override = default;
 
-    void apply(FlowField& flowField, int i, int j) override;       // For 2D
-    void apply(FlowField& flowField, int i, int j, int k) override; // For 3D
+    void apply(TurbulentFlowField& flowField, int i, int j) override;       // For 2D
+    void apply(TurbulentFlowField& flowField, int i, int j, int k) override;  // For 3D
 };
 
 }// namespace Stencils

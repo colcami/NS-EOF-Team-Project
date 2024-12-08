@@ -13,21 +13,21 @@
 namespace Stencils {
 
 VTKWallDistanceStencil::VTKWallDistanceStencil(const Parameters& parameters)
-    : FieldStencil<FlowField>(parameters), written_(false), prefix_("wallDistance") {}
+    : FieldStencil<TurbulentFlowField>(parameters), written_(false), prefix_("wallDistance") {}
 
-void VTKWallDistanceStencil::apply(FlowField& flowField, int i, int j) {
+void VTKWallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j) {
     // Extract and append wall distance for 2D
     RealType h = flowField.getWallDistance().getScalar(i, j);
     wallDistanceStream_ << h << "\n";
 }
 
-void VTKWallDistanceStencil::apply(FlowField& flowField, int i, int j, int k) {
+void VTKWallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j, int k) {
     // Extract and append wall distance for 3D
     RealType h = flowField.getWallDistance().getScalar(i, j, k);
     wallDistanceStream_ << h << "\n";
 }
 
-void VTKWallDistanceStencil::write(FlowField& flowField, int timeStep, RealType simulationTime) {
+void VTKWallDistanceStencil::write(TurbulentFlowField& flowField, int timeStep, RealType simulationTime) {
     // Open the output file
     openFile(timeStep, simulationTime);
 

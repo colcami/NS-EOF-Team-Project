@@ -5,6 +5,7 @@
 #include "FlowField.hpp"
 #include "Parameters.hpp"
 #include "WallDistanceStencil.hpp"
+#include "TurbulentFlowField.hpp"
 #include <sstream>
 #include <fstream>
 #include <string>
@@ -16,7 +17,7 @@ namespace Stencils {
  * This stencil handles the computation and export of wall distance data stored
  * in the flow field to VTK files for visualization.
  */
-class VTKWallDistanceStencil : public FieldStencil<FlowField> {
+class VTKWallDistanceStencil : public FieldStencil<TurbulentFlowField> {
 private:
     bool written_;               //! Indicates whether the file has been written
     std::string prefix_;         //! Prefix for the output VTK files
@@ -47,13 +48,13 @@ public:
     ~VTKWallDistanceStencil() override = default;
 
     /** Applies the stencil for a 2D grid */
-    void apply(FlowField& flowField, int i, int j) override;
+    void apply(TurbulentFlowField& flowField, int i, int j) override;
 
     /** Applies the stencil for a 3D grid */
-    void apply(FlowField& flowField, int i, int j, int k) override;
+    void apply(TurbulentFlowField& flowField, int i, int j, int k) override;
 
     /** Writes the wall distance data to a VTK file */
-    void write(FlowField& flowField, int timeStep, RealType simulationTime);
+    void write(TurbulentFlowField& flowField, int timeStep, RealType simulationTime);
 };
 
 } // namespace Stencils

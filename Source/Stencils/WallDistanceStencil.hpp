@@ -3,6 +3,7 @@
 #include "FieldStencil.hpp"
 #include "FlowField.hpp"
 #include "Parameters.hpp"
+#include "TurbulentFlowField.hpp"
 #include <cmath>
 #include <algorithm>
 #include <string>
@@ -16,7 +17,7 @@
  */
 namespace Stencils {
     
-class WallDistanceStencil : public FieldStencil<FlowField> {
+class WallDistanceStencil : public FieldStencil<TurbulentFlowField> {
 private:
     std::string scenario_; //! Simulation scenario: channel, cavity, or backward-facing step
     RealType lengthX_, lengthY_, lengthZ_; //! Domain dimensions
@@ -26,15 +27,11 @@ private:
 
     void detectScenario(); //! Detect the scenario and initialize relevant parameters
 
-    // Helper methods for 2D and 3D logic
-    void apply2D(FlowField& flowField, int i, int j);
-    void apply3D(FlowField& flowField, int i, int j, int k);
-
 public:
     WallDistanceStencil(const Parameters& parameters);
     ~WallDistanceStencil() override = default;
 
-    void apply(FlowField& flowField, int i, int j) override;       // Dispatch to apply2D or apply3D
-    void apply(FlowField& flowField, int i, int j, int k) override; // Dispatch to apply3D
+    void apply(TurbulentFlowField& flowField, int i, int j) override;       // Dispatch to apply2D or apply3D
+    void apply(TurbulentFlowField& flowField, int i, int j, int k) override; // Dispatch to apply3D
 };
 } // namespace Stencils
