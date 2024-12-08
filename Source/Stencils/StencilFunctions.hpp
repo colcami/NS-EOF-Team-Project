@@ -60,7 +60,7 @@ namespace Stencils {
     }
   }
 
-  void loadLocalViscosity2D(TurbulentFlowField& TflowField, RealType* const localViscosity, int i, int j){
+  void loadLocalViscosity2D(TurbulentFlowField& TflowField, RealType* const localViscosity, int i, int j) {
     for (int row = -1; row <= 1; row++) {
       for (int column = -1; column <= 1; column++) {
         localViscosity[39 + 9 * row + 3 * column] = TflowField.getTurbulentViscosity().getScalar(i + column, j + row);

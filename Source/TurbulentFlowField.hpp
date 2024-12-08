@@ -47,42 +47,9 @@ public:
 
   ~TurbulentFlowField() override = default;
 
-  /** Obtain size in the X direction
-   *
-   * @return Number of cells in the X direction
-   */
-  int getNx() const;
-
-  /** Obtain size in the Y direction
-   *
-   * @return Number of cells in the Y direction
-   */
-  int getNy() const;
-
-  /** Obtain size in the Z direction
-   *
-   * @return Number of cells in the Z direction
-   */
-  int getNz() const;
-
-  int getCellsX() const;
-  int getCellsY() const;
-  int getCellsZ() const;
-
-  ScalarField& getPressure();
-  VectorField& getVelocity();
-
-  IntScalarField& getFlags();
-
-  VectorField& getFGH();
-
-  ScalarField& getRHS();
-
   // New getters for turbulence fields
   ScalarField& getWallDistance();
   ScalarField& getTurbulentViscosity();
   ScalarField& getTotalViscosity();
   
-  void getPressureAndVelocity(RealType& pressure, RealType* const velocity, int i, int j);
-  void getPressureAndVelocity(RealType& pressure, RealType* const velocity, int i, int j, int k);
 };

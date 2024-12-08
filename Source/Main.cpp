@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
     if (flowField == NULL) {
       throw std::runtime_error("flowField == NULL!");
     }
-    simulation = std::make_unique<Simulation>(parameters, flowField);
+    simulation = std::make_unique<Simulation>(parameters, *flowField);
     
   } else {
     throw std::runtime_error("Unknown simulation type! Currently supported: dns, turbulence");
