@@ -3,6 +3,8 @@
 #include "BoundaryType.hpp"
 #include "Definitions.hpp"
 #include "Meshsize.hpp"
+#include <mpi.h>
+#include <petscsys.h>
 
 //! Classes for the parts of the parameters
 //@{

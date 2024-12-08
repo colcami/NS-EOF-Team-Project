@@ -4,6 +4,7 @@
 
 #include "Solvers/PetscSolver.hpp"
 #include "Solvers/SORSolver.hpp"
+#include "spdlog/spdlog.h"
 
 Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   parameters_(parameters),
@@ -21,7 +22,9 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   velocityStencil_(parameters),
   obstacleStencil_(parameters),
   velocityIterator_(flowField_, parameters, velocityStencil_),
-  obstacleIterator_(flowField_, parameters, obstacleStencil_)
+  obstacleIterator_(flowField_, parameters, obstacleStencil_),
+  petscParallelManager_(parameters, flowField_)
+
 #ifdef ENABLE_PETSC
   ,
   solver_(std::make_unique<Solvers::PetscSolver>(flowField_, parameters))
@@ -84,10 +87,14 @@ void Simulation::solveTimestep() {
   // Solve for pressure
   solver_->solve();
   // TODO WS2: communicate pressure values
+  spdlog::debug("Communicating pressure");
+  petscParallelManager_.communicatePressure();
   // Compute velocity
   velocityIterator_.iterate();
   obstacleIterator_.iterate();
   // TODO WS2: communicate velocity values
+  spdlog::debug("Communicating velocity");
+  petscParallelManager_.communicateVelocities();
   // Iterate for velocities on the boundary
   wallVelocityIterator_.iterate();
 }

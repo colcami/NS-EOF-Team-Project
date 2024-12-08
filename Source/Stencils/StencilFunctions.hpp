@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Definitions.hpp"
+#include "FlowField.hpp"
 #include "Parameters.hpp"
 
 namespace Stencils {
