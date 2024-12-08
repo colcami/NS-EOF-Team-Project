@@ -10,6 +10,7 @@ namespace Stencils {
   private:
     RealType localVelocity_[27 * 3];
     RealType localMeshsize_[27 * 3];
+    RealType localViscosity_[27 * 3];
   
   public:
     TurbulentFGHStencil(const Parameters& parameters);

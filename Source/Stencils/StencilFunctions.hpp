@@ -2,6 +2,7 @@
 
 #include "Definitions.hpp"
 #include "Parameters.hpp"
+#include "TurbulentFlowField.hpp"
 
 namespace Stencils {
 
@@ -59,6 +60,24 @@ namespace Stencils {
     }
   }
 
+  void loadLocalViscosity2D(TurbulentFlowField& TflowField, RealType* const localViscosity, int i, int j){
+    for (int row = -1; row <= 1; row++) {
+      for (int column = -1; column <= 1; column++) {
+        localViscosity[39 + 9 * row + 3 * column] = TflowField.getTurbulentViscosity().getScalar(i + column, j + row);
+      }
+    }
+  }
+
+  void loadLocalViscosity3D(TurbulentFlowField& TflowField, RealType* const localViscosity, int i, int j, int k){
+    for (int layer = -1; layer <= 1; layer++) {
+      for (int row = -1; row <= 1; row++) {
+        for (int column = -1; column <= 1; column++) {
+          localViscosity[39 + 27 * layer + 9 * row + 3 * column] = TflowField.getTurbulentViscosity().getScalar(i + column, j + row, k + layer);
+        }
+      }
+    }
+  }  
+
   // Maps an index and a component to the corresponding value in the cube.
   inline int mapd(int i, int j, int k, int component) { return 39 + 27 * k + 9 * j + 3 * i + component; }
 
@@ -85,217 +104,214 @@ namespace Stencils {
 
   //Other first derivatives
  // Derivative of u with respect to y (du/dy) for non-uniform grids
-  inline RealType dudy(const RealType* const lv, const RealType* const lm) {
-    // Velocities at adjacent interfaces
-    const RealType u1 = lv[mapd(0, -1, 0, 0)]; // u(i, j-1)
-    const RealType u2 = lv[mapd(0,  0, 0, 0)]; // u(i, j)
-    const RealType u3 = lv[mapd(0,  1, 0, 0)]; // u(i, j+1)
-    const RealType u4 = lv[mapd(-1, 1, 0, 0)]; // u(i-1, j+1)
-    const RealType u5 = lv[mapd(-1, 0, 0, 0)]; // u(i-1, j)
-    const RealType u6 = lv[mapd(-1, -1, 0, 0)]; // u(i-1, j-1)
+//   inline RealType dudy(const RealType* const lv, const RealType* const lm) {
+//     // Velocities at adjacent interfaces
+//     const RealType u1 = lv[mapd(0, -1, 0, 0)]; // u(i, j-1)
+//     const RealType u2 = lv[mapd(0,  0, 0, 0)]; // u(i, j)
+//     const RealType u3 = lv[mapd(0,  1, 0, 0)]; // u(i, j+1)
+//     const RealType u4 = lv[mapd(-1, 1, 0, 0)]; // u(i-1, j+1)
+//     const RealType u5 = lv[mapd(-1, 0, 0, 0)]; // u(i-1, j)
+//     const RealType u6 = lv[mapd(-1, -1, 0, 0)]; // u(i-1, j-1)
 
-    // Delta y of each cell
-    const RealType dy0 = lm[mapd(0, -1, 0, 1)]; // dy(j-1)
-    const RealType dy1 = lm[mapd(0,  0, 0, 1)]; // dy(j)
-    const RealType dy2 = lm[mapd(0,  1, 0, 1)]; // dy(j+1)
+//     // Delta y of each cell
+//     const RealType dy0 = lm[mapd(0, -1, 0, 1)]; // dy(j-1)
+//     const RealType dy1 = lm[mapd(0,  0, 0, 1)]; // dy(j)
+//     const RealType dy2 = lm[mapd(0,  1, 0, 1)]; // dy(j+1)
 
-    // Compute interpolation weights
-    const RealType a0 = dy1 / (dy1 + dy0); // Weight for j-1
-    const RealType a1 = dy0 / (dy1 + dy0); // Weight for j
-    const RealType a2 = dy2 / (dy1 + dy2); // Weight for j+1
-    const RealType a3 = dy1 / (dy1 + dy2); // Weight for j
+//     // Compute interpolation weights
+//     const RealType a0 = dy1 / (dy1 + dy0); // Weight for j-1
+//     const RealType a1 = dy0 / (dy1 + dy0); // Weight for j
+//     const RealType a2 = dy2 / (dy1 + dy2); // Weight for j+1
+//     const RealType a3 = dy1 / (dy1 + dy2); // Weight for j
 
-    // Interpolate corner velocities at half cells
-    const RealType uint1 = u1 * a0 + u2 * a1; // u(i, j-1/2)
-    const RealType uint2 = u6 * a0 + u5 * a1; // u(i-1, j-1/2)
-    const RealType uint3 = u2 * a2 + u3 * a3; // u(i, j+1/2)
-    const RealType uint4 = u5 * a2 + u4 * a3; // u(i-1, j+1/2)
+//     // Interpolate corner velocities at half cells
+//     const RealType uint1 = u1 * a0 + u2 * a1; // u(i, j-1/2)
+//     const RealType uint2 = u6 * a0 + u5 * a1; // u(i-1, j-1/2)
+//     const RealType uint3 = u2 * a2 + u3 * a3; // u(i, j+1/2)
+//     const RealType uint4 = u5 * a2 + u4 * a3; // u(i-1, j+1/2)
 
-    // Compute interface velocities
-    const RealType uy1 = 0.5 * (uint1 + uint2); // u(i-1/2, j-1/2)
-    const RealType uy2 = 0.5 * (uint3 + uint4); // u(i-1/2, j+1/2)
+//     // Compute interface velocities
+//     const RealType uy1 = 0.5 * (uint1 + uint2); // u(i-1/2, j-1/2)
+//     const RealType uy2 = 0.5 * (uint3 + uint4); // u(i-1/2, j+1/2)
 
-    // Derivative of u with respect to y
-    return (uy2 - uy1) / dy1;
-}
+//     // Derivative of u with respect to y
+//     return (uy2 - uy1) / dy1;
+// }
 
-  // Derivative of u with respect to z (du/dz) for non-uniform grids
-  inline RealType dudz(const RealType* const lv, const RealType* const lm) {
-    // Velocities at adjacent interfaces
-    const RealType u1 = lv[mapd(0, 0, -1, 0)]; // u(i, j, k-1)
-    const RealType u2 = lv[mapd(0, 0,  0, 0)]; // u(i, j, k)
-    const RealType u3 = lv[mapd(0, 0,  1, 0)]; // u(i, j, k+1)
-    const RealType u4 = lv[mapd(-1, 0, 1, 0)]; // u(i-1, j, k+1)
-    const RealType u5 = lv[mapd(-1, 0, 0, 0)]; // u(i-1, j, k)
-    const RealType u6 = lv[mapd(-1, 0, -1, 0)]; // u(i-1, j, k-1)
+//   // Derivative of u with respect to z (du/dz) for non-uniform grids
+//   inline RealType dudz(const RealType* const lv, const RealType* const lm) {
+//     // Velocities at adjacent interfaces
+//     const RealType u1 = lv[mapd(0, 0, -1, 0)]; // u(i, j, k-1)
+//     const RealType u2 = lv[mapd(0, 0,  0, 0)]; // u(i, j, k)
+//     const RealType u3 = lv[mapd(0, 0,  1, 0)]; // u(i, j, k+1)
+//     const RealType u4 = lv[mapd(-1, 0, 1, 0)]; // u(i-1, j, k+1)
+//     const RealType u5 = lv[mapd(-1, 0, 0, 0)]; // u(i-1, j, k)
+//     const RealType u6 = lv[mapd(-1, 0, -1, 0)]; // u(i-1, j, k-1)
 
-    // Delta z of each cell
-    const RealType dz0 = lm[mapd(0, 0, -1, 2)]; // dz(k-1)
-    const RealType dz1 = lm[mapd(0, 0,  0, 2)]; // dz(k)
-    const RealType dz2 = lm[mapd(0, 0,  1, 2)]; // dz(k+1)
+//     // Delta z of each cell
+//     const RealType dz0 = lm[mapd(0, 0, -1, 2)]; // dz(k-1)
+//     const RealType dz1 = lm[mapd(0, 0,  0, 2)]; // dz(k)
+//     const RealType dz2 = lm[mapd(0, 0,  1, 2)]; // dz(k+1)
 
-    // Compute interpolation weights
-    const RealType a0 = dz1 / (dz1 + dz0); // Weight for k-1
-    const RealType a1 = dz0 / (dz1 + dz0); // Weight for k
-    const RealType a2 = dz2 / (dz1 + dz2); // Weight for k+1
-    const RealType a3 = dz1 / (dz1 + dz2); // Weight for k
+//     // Compute interpolation weights
+//     const RealType a0 = dz1 / (dz1 + dz0); // Weight for k-1
+//     const RealType a1 = dz0 / (dz1 + dz0); // Weight for k
+//     const RealType a2 = dz2 / (dz1 + dz2); // Weight for k+1
+//     const RealType a3 = dz1 / (dz1 + dz2); // Weight for k
 
-    // Interpolate corner velocities at half cells
-    const RealType uint1 = u1 * a0 + u2 * a1; // u(i, j, k-1/2)
-    const RealType uint2 = u6 * a0 + u5 * a1; // u(i-1, j, k-1/2)
-    const RealType uint3 = u2 * a2 + u3 * a3; // u(i, j, k+1/2)
-    const RealType uint4 = u5 * a2 + u4 * a3; // u(i-1, j, k+1/2)
+//     // Interpolate corner velocities at half cells
+//     const RealType uint1 = u1 * a0 + u2 * a1; // u(i, j, k-1/2)
+//     const RealType uint2 = u6 * a0 + u5 * a1; // u(i-1, j, k-1/2)
+//     const RealType uint3 = u2 * a2 + u3 * a3; // u(i, j, k+1/2)
+//     const RealType uint4 = u5 * a2 + u4 * a3; // u(i-1, j, k+1/2)
 
-    // Compute interface velocities
-    const RealType uz1 = 0.5 * (uint1 + uint2); // u(i-1/2, j, k-1/2)
-    const RealType uz2 = 0.5 * (uint3 + uint4); // u(i-1/2, j, k+1/2)
+//     // Compute interface velocities
+//     const RealType uz1 = 0.5 * (uint1 + uint2); // u(i-1/2, j, k-1/2)
+//     const RealType uz2 = 0.5 * (uint3 + uint4); // u(i-1/2, j, k+1/2)
 
-    // Derivative of u with respect to z
-    return (uz2 - uz1) / dz1;
-}
+//     // Derivative of u with respect to z
+//     return (uz2 - uz1) / dz1;
+// }
 
-  // Derivative of v with respect to x (dv/dx) for non-uniform grids
-  inline RealType dvdx(const RealType* const lv, const RealType* const lm) {
-    // Velocities at adjacent interfaces
-    const RealType v1 = lv[mapd(-1, 0, 0, 1)]; // v(i-1, j, k)
-    const RealType v2 = lv[mapd( 0, 0, 0, 1)]; // v(i, j, k)
-    const RealType v3 = lv[mapd( 1, 0, 0, 1)]; // v(i+1, j, k)
-    const RealType v4 = lv[mapd( 1, -1, 0, 1)]; // v(i+1, j-1, k)
-    const RealType v5 = lv[mapd( 0, -1, 0, 1)]; // v(i, j-1, k)
-    const RealType v6 = lv[mapd(-1, -1, 0, 1)]; // v(i-1, j-1, k)
+//   // Derivative of v with respect to x (dv/dx) for non-uniform grids
+//   inline RealType dvdx(const RealType* const lv, const RealType* const lm) {
+//     // Velocities at adjacent interfaces
+//     const RealType v1 = lv[mapd(-1, 0, 0, 1)]; // v(i-1, j, k)
+//     const RealType v2 = lv[mapd( 0, 0, 0, 1)]; // v(i, j, k)
+//     const RealType v3 = lv[mapd( 1, 0, 0, 1)]; // v(i+1, j, k)
+//     const RealType v4 = lv[mapd( 1, -1, 0, 1)]; // v(i+1, j-1, k)
+//     const RealType v5 = lv[mapd( 0, -1, 0, 1)]; // v(i, j-1, k)
+//     const RealType v6 = lv[mapd(-1, -1, 0, 1)]; // v(i-1, j-1, k)
 
-    // Delta x of each cell
-    const RealType dx0 = lm[mapd(-1, 0, 0, 0)]; // dx(i-1)
-    const RealType dx1 = lm[mapd( 0, 0, 0, 0)]; // dx(i)
-    const RealType dx2 = lm[mapd( 1, 0, 0, 0)]; // dx(i+1)
+//     // Delta x of each cell
+//     const RealType dx0 = lm[mapd(-1, 0, 0, 0)]; // dx(i-1)
+//     const RealType dx1 = lm[mapd( 0, 0, 0, 0)]; // dx(i)
+//     const RealType dx2 = lm[mapd( 1, 0, 0, 0)]; // dx(i+1)
 
-    // Compute interpolation weights
-    const RealType a0 = dx1 / (dx1 + dx0); // Weight for i-1
-    const RealType a1 = dx0 / (dx1 + dx0); // Weight for i
-    const RealType a2 = dx2 / (dx1 + dx2); // Weight for i+1
-    const RealType a3 = dx1 / (dx1 + dx2); // Weight for i
+//     // Compute interpolation weights
+//     const RealType a0 = dx1 / (dx1 + dx0); // Weight for i-1
+//     const RealType a1 = dx0 / (dx1 + dx0); // Weight for i
+//     const RealType a2 = dx2 / (dx1 + dx2); // Weight for i+1
+//     const RealType a3 = dx1 / (dx1 + dx2); // Weight for i
 
-    // Interpolate corner velocities at half cells
-    const RealType vint1 = v1 * a0 + v2 * a1; // v(i-1/2, j, k)
-    const RealType vint2 = v6 * a0 + v5 * a1; // v(i-1/2, j-1, k)
-    const RealType vint3 = v2 * a2 + v3 * a3; // v(i+1/2, j, k)
-    const RealType vint4 = v5 * a2 + v4 * a3; // v(i+1/2, j-1, k)
+//     // Interpolate corner velocities at half cells
+//     const RealType vint1 = v1 * a0 + v2 * a1; // v(i-1/2, j, k)
+//     const RealType vint2 = v6 * a0 + v5 * a1; // v(i-1/2, j-1, k)
+//     const RealType vint3 = v2 * a2 + v3 * a3; // v(i+1/2, j, k)
+//     const RealType vint4 = v5 * a2 + v4 * a3; // v(i+1/2, j-1, k)
 
-    // Compute interface velocities
-    const RealType vx1 = 0.5 * (vint1 + vint2); // v(i-1/2, j-1/2, k)
-    const RealType vx2 = 0.5 * (vint3 + vint4); // v(i+1/2, j-1/2, k)
+//     // Compute interface velocities
+//     const RealType vx1 = 0.5 * (vint1 + vint2); // v(i-1/2, j-1/2, k)
+//     const RealType vx2 = 0.5 * (vint3 + vint4); // v(i+1/2, j-1/2, k)
 
-    // Derivative of v with respect to x
-    return (vx2 - vx1) / dx1;
-}
+//     // Derivative of v with respect to x
+//     return (vx2 - vx1) / dx1;
+// }
 
-  // Derivative of v with respect to z (dv/dz) for non-uniform grids
-  inline RealType dvdz(const RealType* const lv, const RealType* const lm) {
-    // Velocities at adjacent interfaces
-    const RealType v1 = lv[mapd(0, 0, -1, 1)]; // v(i, j, k-1)
-    const RealType v2 = lv[mapd(0, 0,  0, 1)]; // v(i, j, k)
-    const RealType v3 = lv[mapd(0, 0,  1, 1)]; // v(i, j, k+1)
-    const RealType v4 = lv[mapd(0, -1, 1, 1)]; // v(i, j-1, k+1)
-    const RealType v5 = lv[mapd(0, -1, 0, 1)]; // v(i, j-1, k)
-    const RealType v6 = lv[mapd(0, -1, -1, 1)]; // v(i, j-1, k-1)
+//   // Derivative of v with respect to z (dv/dz) for non-uniform grids
+//   inline RealType dvdz(const RealType* const lv, const RealType* const lm) {
+//     // Velocities at adjacent interfaces
+//     const RealType v1 = lv[mapd(0, 0, -1, 1)]; // v(i, j, k-1)
+//     const RealType v2 = lv[mapd(0, 0,  0, 1)]; // v(i, j, k)
+//     const RealType v3 = lv[mapd(0, 0,  1, 1)]; // v(i, j, k+1)
+//     const RealType v4 = lv[mapd(0, -1, 1, 1)]; // v(i, j-1, k+1)
+//     const RealType v5 = lv[mapd(0, -1, 0, 1)]; // v(i, j-1, k)
+//     const RealType v6 = lv[mapd(0, -1, -1, 1)]; // v(i, j-1, k-1)
 
-    // Delta z of each cell
-    const RealType dz0 = lm[mapd(0, 0, -1, 2)]; // dz(k-1)
-    const RealType dz1 = lm[mapd(0, 0,  0, 2)]; // dz(k)
-    const RealType dz2 = lm[mapd(0, 0,  1, 2)]; // dz(k+1)
+//     // Delta z of each cell
+//     const RealType dz0 = lm[mapd(0, 0, -1, 2)]; // dz(k-1)
+//     const RealType dz1 = lm[mapd(0, 0,  0, 2)]; // dz(k)
+//     const RealType dz2 = lm[mapd(0, 0,  1, 2)]; // dz(k+1)
 
-    // Compute interpolation weights
-    const RealType a0 = dz1 / (dz1 + dz0); // Weight for k-1
-    const RealType a1 = dz0 / (dz1 + dz0); // Weight for k
-    const RealType a2 = dz2 / (dz1 + dz2); // Weight for k+1
-    const RealType a3 = dz1 / (dz1 + dz2); // Weight for k
+//     // Compute interpolation weights
+//     const RealType a0 = dz1 / (dz1 + dz0); // Weight for k-1
+//     const RealType a1 = dz0 / (dz1 + dz0); // Weight for k
+//     const RealType a2 = dz2 / (dz1 + dz2); // Weight for k+1
+//     const RealType a3 = dz1 / (dz1 + dz2); // Weight for k
 
-    // Interpolate corner velocities at half cells
-    const RealType vint1 = v1 * a0 + v2 * a1; // v(i, j, k-1/2)
-    const RealType vint2 = v6 * a0 + v5 * a1; // v(i, j-1, k-1/2)
-    const RealType vint3 = v2 * a2 + v3 * a3; // v(i, j, k+1/2)
-    const RealType vint4 = v5 * a2 + v4 * a3; // v(i, j-1, k+1/2)
+//     // Interpolate corner velocities at half cells
+//     const RealType vint1 = v1 * a0 + v2 * a1; // v(i, j, k-1/2)
+//     const RealType vint2 = v6 * a0 + v5 * a1; // v(i, j-1, k-1/2)
+//     const RealType vint3 = v2 * a2 + v3 * a3; // v(i, j, k+1/2)
+//     const RealType vint4 = v5 * a2 + v4 * a3; // v(i, j-1, k+1/2)
 
-    // Compute interface velocities
-    const RealType vz1 = 0.5 * (vint1 + vint2); // v(i, j-1/2, k-1/2)
-    const RealType vz2 = 0.5 * (vint3 + vint4); // v(i, j-1/2, k+1/2)
+//     // Compute interface velocities
+//     const RealType vz1 = 0.5 * (vint1 + vint2); // v(i, j-1/2, k-1/2)
+//     const RealType vz2 = 0.5 * (vint3 + vint4); // v(i, j-1/2, k+1/2)
 
-    // Derivative of v with respect to z
-    return (vz2 - vz1) / dz1;
-}
+//     // Derivative of v with respect to z
+//     return (vz2 - vz1) / dz1;
+// }
 
-  // Derivative of w with respect to x (dw/dx) for non-uniform grids
-  inline RealType dwdx(const RealType* const lv, const RealType* const lm) {
-    // Velocities at adjacent interfaces
-    const RealType w1 = lv[mapd(-1, 0, 0, 2)]; // w(i-1, j, k)
-    const RealType w2 = lv[mapd( 0, 0, 0, 2)]; // w(i, j, k)
-    const RealType w3 = lv[mapd( 1, 0, 0, 2)]; // w(i+1, j, k)
-    const RealType w4 = lv[mapd( 1, -1, 0, 2)]; // w(i+1, j-1, k)
-    const RealType w5 = lv[mapd( 0, -1, 0, 2)]; // w(i, j-1, k)
-    const RealType w6 = lv[mapd(-1, -1, 0, 2)]; // w(i-1, j-1, k)
+//   // Derivative of w with respect to x (dw/dx) for non-uniform grids
+//   inline RealType dwdx(const RealType* const lv, const RealType* const lm) {
+//     // Velocities at adjacent interfaces
+//     const RealType w1 = lv[mapd(-1, 0, 0, 2)]; // w(i-1, j, k)
+//     const RealType w2 = lv[mapd( 0, 0, 0, 2)]; // w(i, j, k)
+//     const RealType w3 = lv[mapd( 1, 0, 0, 2)]; // w(i+1, j, k)
+//     const RealType w4 = lv[mapd( 1, -1, 0, 2)]; // w(i+1, j-1, k)
+//     const RealType w5 = lv[mapd( 0, -1, 0, 2)]; // w(i, j-1, k)
+//     const RealType w6 = lv[mapd(-1, -1, 0, 2)]; // w(i-1, j-1, k)
 
-    // Delta x of each cell
-    const RealType dx0 = lm[mapd(-1, 0, 0, 0)]; // dx(i-1)
-    const RealType dx1 = lm[mapd( 0, 0, 0, 0)]; // dx(i)
-    const RealType dx2 = lm[mapd( 1, 0, 0, 0)]; // dx(i+1)
+//     // Delta x of each cell
+//     const RealType dx0 = lm[mapd(-1, 0, 0, 0)]; // dx(i-1)
+//     const RealType dx1 = lm[mapd( 0, 0, 0, 0)]; // dx(i)
+//     const RealType dx2 = lm[mapd( 1, 0, 0, 0)]; // dx(i+1)
 
-    // Compute interpolation weights
-    const RealType a0 = dx1 / (dx1 + dx0); // Weight for i-1
-    const RealType a1 = dx0 / (dx1 + dx0); // Weight for i
-    const RealType a2 = dx2 / (dx1 + dx2); // Weight for i+1
-    const RealType a3 = dx1 / (dx1 + dx2); // Weight for i
+//     // Compute interpolation weights
+//     const RealType a0 = dx1 / (dx1 + dx0); // Weight for i-1
+//     const RealType a1 = dx0 / (dx1 + dx0); // Weight for i
+//     const RealType a2 = dx2 / (dx1 + dx2); // Weight for i+1
+//     const RealType a3 = dx1 / (dx1 + dx2); // Weight for i
 
-    // Interpolate corner velocities at half cells
-    const RealType wint1 = w1 * a0 + w2 * a1; // w(i-1/2, j, k)
-    const RealType wint2 = w6 * a0 + w5 * a1; // w(i-1/2, j-1, k)
-    const RealType wint3 = w2 * a2 + w3 * a3; // w(i+1/2, j, k)
-    const RealType wint4 = w5 * a2 + w4 * a3; // w(i+1/2, j-1, k)
+//     // Interpolate corner velocities at half cells
+//     const RealType wint1 = w1 * a0 + w2 * a1; // w(i-1/2, j, k)
+//     const RealType wint2 = w6 * a0 + w5 * a1; // w(i-1/2, j-1, k)
+//     const RealType wint3 = w2 * a2 + w3 * a3; // w(i+1/2, j, k)
+//     const RealType wint4 = w5 * a2 + w4 * a3; // w(i+1/2, j-1, k)
 
-    // Compute interface velocities
-    const RealType wx1 = 0.5 * (wint1 + wint2); // w(i-1/2, j-1/2, k)
-    const RealType wx2 = 0.5 * (wint3 + wint4); // w(i+1/2, j-1/2, k)
+//     // Compute interface velocities
+//     const RealType wx1 = 0.5 * (wint1 + wint2); // w(i-1/2, j-1/2, k)
+//     const RealType wx2 = 0.5 * (wint3 + wint4); // w(i+1/2, j-1/2, k)
 
-    // Derivative of w with respect to x
-    return (wx2 - wx1) / dx1;
-}
+//     // Derivative of w with respect to x
+//     return (wx2 - wx1) / dx1;
+// }
 
-  // Derivative of w with respect to y (dw/dy) for non-uniform grids
-  inline RealType dwdy(const RealType* const lv, const RealType* const lm) {
-    // Velocities at adjacent interfaces
-    const RealType w1 = lv[mapd(0, -1, 0, 2)]; // w(i, j-1, k)
-    const RealType w2 = lv[mapd(0,  0, 0, 2)]; // w(i, j, k)
-    const RealType w3 = lv[mapd(0,  1, 0, 2)]; // w(i, j+1, k)
-    const RealType w4 = lv[mapd(-1, 1, 0, 2)]; // w(i-1, j+1, k)
-    const RealType w5 = lv[mapd(-1, 0, 0, 2)]; // w(i-1, j, k)
-    const RealType w6 = lv[mapd(-1, -1, 0, 2)]; // w(i-1, j-1, k)
+//   // Derivative of w with respect to y (dw/dy) for non-uniform grids
+//   inline RealType dwdy(const RealType* const lv, const RealType* const lm) {
+//     // Velocities at adjacent interfaces
+//     const RealType w1 = lv[mapd(0, -1, 0, 2)]; // w(i, j-1, k)
+//     const RealType w2 = lv[mapd(0,  0, 0, 2)]; // w(i, j, k)
+//     const RealType w3 = lv[mapd(0,  1, 0, 2)]; // w(i, j+1, k)
+//     const RealType w4 = lv[mapd(-1, 1, 0, 2)]; // w(i-1, j+1, k)
+//     const RealType w5 = lv[mapd(-1, 0, 0, 2)]; // w(i-1, j, k)
+//     const RealType w6 = lv[mapd(-1, -1, 0, 2)]; // w(i-1, j-1, k)
 
-    // Delta y of each cell
-    const RealType dy0 = lm[mapd(0, -1, 0, 1)]; // dy(j-1)
-    const RealType dy1 = lm[mapd(0,  0, 0, 1)]; // dy(j)
-    const RealType dy2 = lm[mapd(0,  1, 0, 1)]; // dy(j+1)
+//     // Delta y of each cell
+//     const RealType dy0 = lm[mapd(0, -1, 0, 1)]; // dy(j-1)
+//     const RealType dy1 = lm[mapd(0,  0, 0, 1)]; // dy(j)
+//     const RealType dy2 = lm[mapd(0,  1, 0, 1)]; // dy(j+1)
 
-    // Compute interpolation weights
-    const RealType a0 = dy1 / (dy1 + dy0); // Weight for j-1
-    const RealType a1 = dy0 / (dy1 + dy0); // Weight for j
-    const RealType a2 = dy2 / (dy1 + dy2); // Weight for j+1
-    const RealType a3 = dy1 / (dy1 + dy2); // Weight for j
+//     // Compute interpolation weights
+//     const RealType a0 = dy1 / (dy1 + dy0); // Weight for j-1
+//     const RealType a1 = dy0 / (dy1 + dy0); // Weight for j
+//     const RealType a2 = dy2 / (dy1 + dy2); // Weight for j+1
+//     const RealType a3 = dy1 / (dy1 + dy2); // Weight for j
 
-    // Interpolate corner velocities at half cells
-    const RealType wint1 = w1 * a0 + w2 * a1; // w(i, j-1/2, k)
-    const RealType wint2 = w6 * a0 + w5 * a1; // w(i-1, j-1/2, k)
-    const RealType wint3 = w2 * a2 + w3 * a3; // w(i, j+1/2, k)
-    const RealType wint4 = w5 * a2 + w4 * a3; // w(i-1, j+1/2, k)
+//     // Interpolate corner velocities at half cells
+//     const RealType wint1 = w1 * a0 + w2 * a1; // w(i, j-1/2, k)
+//     const RealType wint2 = w6 * a0 + w5 * a1; // w(i-1, j-1/2, k)
+//     const RealType wint3 = w2 * a2 + w3 * a3; // w(i, j+1/2, k)
+//     const RealType wint4 = w5 * a2 + w4 * a3; // w(i-1, j+1/2, k)
 
-    // Compute interface velocities
-    const RealType wy1 = 0.5 * (wint1 + wint2); // w(i-1/2, j-1/2, k)
-    const RealType wy2 = 0.5 * (wint3 + wint4); // w(i-1/2, j+1/2, k)
+//     // Compute interface velocities
+//     const RealType wy1 = 0.5 * (wint1 + wint2); // w(i-1/2, j-1/2, k)
+//     const RealType wy2 = 0.5 * (wint3 + wint4); // w(i-1/2, j+1/2, k)
 
-    // Derivative of w with respect to y
-    return (wy2 - wy1) / dy1;
-}
-
-
-
+//     // Derivative of w with respect to y
+//     return (wy2 - wy1) / dy1;
+// }
 
     // TODO WS1: Second derivatives
 
@@ -872,167 +888,454 @@ namespace Stencils {
     return 2*( w1/(dz_p*(dz_p + dz_n)) - w0/(dz_n*dz_p) + w2/(dz_n*(dz_p + dz_n)));
   }
 
-  //New turbulence model derivatives for non uniform grids
-  //du/dx2
- inline RealType diffusiveUx2(FlowField& flowField, const RealType* const lv, const RealType* const lm, const Parameters& parameters, int i, int j, int k) {
-    const RealType u0 = lv[mapd(0, 0, 0, 0)];
-    const RealType u1 = lv[mapd(1, 0, 0, 0)];
-    const RealType u2 = lv[mapd(-1, 0, 0, 0)];
-    const RealType dx_n = lm[mapd(0, 0, 0, 0)];
-    const RealType dx_p = lm[mapd(1, 0, 0, 0)];
+    // ! WS2 functions
+  // very important naming scheme variable called var which has 3 indices. var_ijk
+  // they can take values from 0 to 4, 
+  // 0 -> 0
+  // 1 -> +1
+  // 2 -> -1
+  // 3 -> +1/2
+  // 4 -> -1/2
+  // nu_011 would be nu_i j+1 k+1
 
-    const RealType nu_star_n = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i - 1, j, k);
-    const RealType nu_star_p = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i + 1, j, k);
+  //! INTERPOLATIONS FOR NU
+        //! FOR F
+  inline RealType nu_310(const RealType* const lm, const RealType* const lnu){ //nu i+1/2 j+1 k
+    const RealType nu_110 = lnu[mapd(1,1,0,0)]; //nu i+1 j+1 k
+    const RealType nu_010 = lnu[mapd(0,1,0,0)]; //nu i j+1 k
+
+    const RealType dx_110 = lm[mapd(1,1,0,0)]; //dx i+1 j+1 k
+    const RealType dx_010 = lm[mapd(0,1,0,0)]; //dx i j+1 k
+
+    return dx_110/(dx_110 + dx_010) * nu_010 + dx_010/(dx_110 + dx_010) * nu_110;
+  }
+  
+  inline RealType nu_300(const RealType* const lm, const RealType* const lnu){ //nu i+1/2 j k
+    const RealType nu_100 = lnu[mapd(1,0,0,0)]; //nu i+1 j k
+    const RealType nu_000 = lnu[mapd(0,0,0,0)]; //nu i j k
+
+    const RealType dx_100 = lm[mapd(1,0,0,0)]; //dx i+1 j k
+    const RealType dx_000 = lm[mapd(0,0,0,0)]; //dx i j k
+
+    return dx_100/(dx_100 + dx_000) * nu_000 + dx_000/(dx_100 + dx_000) * nu_100;
+  }
+
+  inline RealType nu_320(const RealType* const lm, const RealType* const lnu){ //nu i+1/2 j-1 k
+    const RealType nu_120 = lnu[mapd(1,-1,0,0)]; //nu i+1 j-1 k
+    const RealType nu_020 = lnu[mapd(0,-1,0,0)]; //nu i j-1 k
+
+    const RealType dx_120 = lm[mapd(1,-1,0,0)]; //dx i+1 j-1 k
+    const RealType dx_020 = lm[mapd(0,-1,0,0)]; //dx i j-1 k
+
+    return dx_120/(dx_120 + dx_020) * nu_020 + dx_020/(dx_120 + dx_020) * nu_120;
+  }
+
+  inline RealType nu_330(const RealType* const lm, const RealType* const lnu){ //! nu i+1/2 j+1/2 k
+    const RealType nu_star_310 = nu_310(lm, lnu); //nu i+1/2 j+1 k
+    const RealType nu_star_300 = nu_300(lm, lnu); //nu i+1/2 j k
+
+    const RealType dy_010 = lm[mapd(0,1,0,1)]; //dy i j+1 k
+    const RealType dy_000 = lm[mapd(0,0,0,1)]; //dy i j k
+
+    return dy_010/(dy_010 + dy_000)*nu_star_300 + dy_000/(dy_010 + dy_000)*nu_star_310 ;
+  }
+
+  inline RealType nu_340(const RealType* const lm, const RealType* const lnu){ //! nu i+1/2 j-1/2 k
+    const RealType nu_star_320 = nu_320(lm, lnu); //nu i+1/2 j-1 k
+    const RealType nu_star_300 = nu_300(lm, lnu); //nu i+1/2 j k
+
+    const RealType dy_020 = lm[mapd(0,-1,0,1)]; //dy i j-1 k
+    const RealType dy_000 = lm[mapd(0,0,0,1)]; //dy i j k
+
+    return dy_020/(dy_020 + dy_000)*nu_star_300 + dy_000/(dy_020 + dy_000)*nu_star_320 ;
+  }
+
+  inline RealType nu_301(const RealType* const lm, const RealType* const lnu){ //nu i+1/2 j k+1
+    const RealType nu_101 = lnu[mapd(1,0,1,0)]; //nu i+1 j k+1
+    const RealType nu_001 = lnu[mapd(0,0,1,0)]; //nu i j k+1
+
+    const RealType dx_101 = lm[mapd(1,0,1,0)]; //dx i+1 j k+1
+    const RealType dx_001 = lm[mapd(0,0,1,0)]; //dx i j k+1
+
+    return dx_101/(dx_101 + dx_001) * nu_001 + dx_001/(dx_101 + dx_001) * nu_101;
+  }
+
+  inline RealType nu_302(const RealType* const lm, const RealType* const lnu){ //nu i+1/2 j k-1
+    const RealType nu_102 = lnu[mapd(1,0,-1,0)]; //nu i+1 j k-1
+    const RealType nu_002 = lnu[mapd(0,0,-1,0)]; //nu i j k-1
+
+    const RealType dx_102 = lm[mapd(1,0,-1,0)]; //dx i+1 j k-1
+    const RealType dx_002 = lm[mapd(0,0,-1,0)]; //dx i j k-1
+
+    return dx_102/(dx_102 + dx_002) * nu_002 + dx_002/(dx_102 + dx_002) * nu_102;
+  }
+
+  inline RealType nu_303(const RealType* const lm, const RealType* const lnu){ //! nu i+1/2 j k+1/2
+    const RealType nu_star_301 = nu_301(lm, lnu); //nu i+1/2 j k+1
+    const RealType nu_star_300 = nu_300(lm, lnu); //nu i+1/2 j k
+
+    const RealType dz_001 = lm[mapd(0,0,1,2)]; //dz i j k+1
+    const RealType dz_000 = lm[mapd(0,0,0,2)]; //dz i j k
+
+    return dz_001/(dz_001 + dz_000)*nu_star_300 + dz_000/(dz_001 + dz_000)*nu_star_301 ;
+  }
+
+  inline RealType nu_304(const RealType* const lm, const RealType* const lnu){ //! nu i+1/2 j k-1/2
+    const RealType nu_star_302 = nu_302(lm, lnu); //nu i+1/2 j k-1
+    const RealType nu_star_300 = nu_300(lm, lnu); //nu i+1/2 j k
+
+    const RealType dz_002 = lm[mapd(0,0,-1,2)]; //dz i j k-1
+    const RealType dz_000 = lm[mapd(0,0,0,2)]; //dz i j k
+
+    return dz_002/(dz_002 + dz_000)*nu_star_300 + dz_000/(dz_002 + dz_000)*nu_star_302 ;
+  }
+
+    //! FOR G
+  inline RealType nu_030(const RealType* const lm, const RealType* const lnu){ //nu i j+1/2 k
+    const RealType nu_010 = lnu[mapd(0,1,0,0)]; //nu i j+1 k
+    const RealType nu_000 = lnu[mapd(0,0,0,0)]; //nu i j k
+
+    const RealType dy_010 = lm[mapd(0,1,0,1)]; //dx i j+1 k
+    const RealType dy_000 = lm[mapd(0,0,0,1)]; //dx i j k
+
+    return dy_010/(dy_010 + dy_000) * nu_000 + dy_000/(dy_010 + dy_000) * nu_010;
+  }
+
+  inline RealType nu_230(const RealType* const lm, const RealType* const lnu){ //nu i-1 j+1/2 k
+    const RealType nu_210 = lnu[mapd(-1,1,0,0)]; //nu i-1 j+1 k
+    const RealType nu_200 = lnu[mapd(-1,0,0,0)]; //nu i-1 j k
+
+    const RealType dy_210 = lm[mapd(-1,1,0,1)]; //dx i-1 j+1 k
+    const RealType dy_200 = lm[mapd(-1,0,0,1)]; //dx i-1 j k
+
+    return dy_210/(dy_210 + dy_200) * nu_200 + dy_200/(dy_210 + dy_200) * nu_210;
+  }
+
+  inline RealType nu_430(const RealType* const lm, const RealType* const lnu){ //! nu i-1/2 j+1/2 k
+    const RealType nu_star_230 = nu_230(lm, lnu); //nu i-1 j+1/2 k
+    const RealType nu_star_030 = nu_030(lm, lnu); //nu i j+1/2 k
+
+    const RealType dx_200 = lm[mapd(-1,0,0,0)]; //dx i-1 j k
+    const RealType dx_000 = lm[mapd(0,0,0,0)]; //dx i j k
+
+    return dx_200/(dx_200 + dx_000)*nu_star_030 + dx_000/(dx_200 + dx_000)*nu_star_230 ;
+  }
+
+  inline RealType nu_031(const RealType* const lm, const RealType* const lnu){ //nu i j+1/2 k+1
+    const RealType nu_011 = lnu[mapd(0,1,1,0)]; //nu i j+1 k+1
+    const RealType nu_001 = lnu[mapd(0,0,1,0)]; //nu i j k+1
+
+    const RealType dy_011 = lm[mapd(0,1,1,1)]; //dy i j+1 k+1
+    const RealType dy_001 = lm[mapd(0,0,1,1)]; //dy i j k+1
+  
+    return dy_011/(dy_011 + dy_001) * nu_001 + dy_001/(dy_011 + dy_001) * nu_011; 
+  }
+
+  inline RealType nu_032(const RealType* const lm, const RealType* const lnu){ //nu i j+1/2 k-1
+    const RealType nu_012 = lnu[mapd(0,1,-1,0)]; //nu i j+1 k-1
+    const RealType nu_002 = lnu[mapd(0,0,-1,0)]; //nu i j k-1
+
+    const RealType dy_012 = lm[mapd(0,1,-1,1)]; //dy i j+1 k-1
+    const RealType dy_002 = lm[mapd(0,0,-1,1)]; //dy i j k-1
+  
+    return dy_012/(dy_012 + dy_002) * nu_002 + dy_002/(dy_012 + dy_002) * nu_012; 
+  }
+
+  inline RealType nu_033(const RealType* const lm, const RealType* const lnu){ //! nu i j+1/2 k+1/2
+    const RealType nu_star_031 = nu_031(lm, lnu); //nu i j+1/2 k+1
+    const RealType nu_star_030 = nu_030(lm, lnu); //nu i j+1/2 k
+
+    const RealType dz_001 = lm[mapd(0,0,1,2)]; //dz i j k+1
+    const RealType dz_000 = lm[mapd(0,0,0,2)]; //dz i j k
+
+    return dz_001/(dz_001 + dz_000)* nu_star_030 + dz_000/(dz_001 + dz_000)*nu_star_031 ;
+  }
+  
+  inline RealType nu_034(const RealType* const lm, const RealType* const lnu){ //! nu i j+1/2 k-1/2
+    const RealType nu_star_032 = nu_032(lm, lnu); //nu i j+1/2 k-1
+    const RealType nu_star_030 = nu_030(lm, lnu); //nu i j+1/2 k
+
+    const RealType dz_002 = lm[mapd(0,0,-1,2)]; //dz i j k-1
+    const RealType dz_000 = lm[mapd(0,0,0,2)]; //dz i j k
+
+    return dz_002/(dz_002 + dz_000)* nu_star_030 + dz_000/(dz_002 + dz_000)*nu_star_032 ;
+  }
+
+      //! FOR H
+  inline RealType nu_003(const RealType* const lm, const RealType* const lnu){ //nu i j k+1/2
+    const RealType nu_001 = lnu[mapd(0,0,1,0)]; //nu i j k+1
+    const RealType nu_000 = lnu[mapd(0,0,0,0)]; //nu i j k
+
+    const RealType dz_001 = lm[mapd(0,0,1,2)]; //dz i j k+1
+    const RealType dz_000 = lm[mapd(0,0,0,2)]; //dz i j k
+
+    return dz_001/(dz_001 + dz_000) * nu_000 + dz_000/(dz_001 + dz_000) * nu_001 ; 
+  }
+
+  inline RealType nu_203(const RealType* const lm, const RealType* const lnu){ //nu i-1 j k+1/2
+    const RealType nu_201 = lnu[mapd(-1,0,1,0)]; //nu i-1 j k+1
+    const RealType nu_200 = lnu[mapd(-1,0,0,0)]; //nu i-1 j k
+
+    const RealType dz_201 = lm[mapd(-1,0,1,2)]; //dz i-1 j k+1
+    const RealType dz_200 = lm[mapd(-1,0,0,2)]; //dz i-1 j k
+
+    return dz_201/(dz_201 + dz_200) * nu_200 + dz_200/(dz_201 + dz_200) * nu_201 ; 
+  }
+
+  inline RealType nu_403(const RealType* const lm, const RealType* const lnu){ //! nu i-1/2 j k+1/2
+    const RealType nu_star_203 = nu_203(lm, lnu); //nu i-1 j k+1/2
+    const RealType nu_star_003 = nu_003(lm, lnu); //nu i j k+1/2
+
+    const RealType dx_200 = lm[mapd(-1,0,0,0)]; //dx i-1 j k
+    const RealType dx_000 = lm[mapd(0,0,0,0)]; //dx i j k 
+
+    return dx_200/(dx_200 + dx_000) * nu_star_003 + dx_000/(dx_200 + dx_000) * nu_star_203 ;
+  }
+
+  // inline RealType nu_013(const RealType* const lm, const RealType* const lnu){ //nu i j+1 k+1/2
+  //   const RealType nu_011 = lnu[mapd(0,1,1,0)]; //nu i j+1 k+1
+  //   const RealType nu_010 = lnu[mapd(0,1,0,0)]; //nu i j+1 k 
+
+  //   const RealType dz_011 = lm[mapd(0,1,1,2)]; //dz i j+1 k+1
+  //   const RealType dz_010 = lm[mapd(0,1,0,2)]; //dz i j+1 k 
+
+  //   return dz_011/(dz_011 + dz_010) * nu_010 + dz_010/(dz_011 + dz_010) * nu_011 ;
+  // }
+
+  inline RealType nu_023(const RealType* const lm, const RealType* const lnu){ //nu i j-1 k+1/2
+    const RealType nu_021 = lnu[mapd(0,-1,1,0)]; //nu i j-1 k+1
+    const RealType nu_020 = lnu[mapd(0,-1,0,0)]; //nu i j-1 k 
+
+    const RealType dz_021 = lm[mapd(0,-1,1,2)]; //dz i j-1 k+1
+    const RealType dz_020 = lm[mapd(0,-1,0,2)]; //dz i j-1 k 
+
+    return dz_021/(dz_021 + dz_020) * nu_020 + dz_020/(dz_021 + dz_020) * nu_021 ;
+  }
+
+  inline RealType nu_043(const RealType* const lm, const RealType* const lnu){ //! nu i j-1/2 k+1/2
+    const RealType nu_star_023 = nu_023(lm, lnu); //nu i j-1 k+1/2
+    const RealType nu_star_003 = nu_003(lm, lnu); //nu i j k+1/2
+
+    const RealType dy_020 = lm[mapd(0,-1,0,1)]; // dy i j-1 k
+    const RealType dy_000 = lm[mapd(0,0,0,1)]; // dy i j k
+
+    return dy_020/(dy_020 + dy_000) * nu_star_003 + dy_000/(dy_020 + dy_000) * nu_star_023 ;
+  }
+
+    //! cell half sizings
+  inline RealType dx_300(const RealType* const lm){ // dx i+1/2 j k
+    const RealType dx_100 = lm[mapd(1,0,0,0)] ; //dx i+1 j k
+    const RealType dx_000 = lm[mapd(0,0,0,0)] ; //dx i j k
+
+    return 0.5 * (dx_100 + dx_000);
+  }
+
+  inline RealType dx_400(const RealType* const lm){ // dx i-1/2 j k
+    const RealType dx_200 = lm[mapd(-1,0,0,0)] ; //dx i-1 j k
+    const RealType dx_000 = lm[mapd(0,0,0,0)] ; //dx i j k
+
+    return 0.5 * (dx_200 + dx_000);
+  }
+
+  inline RealType dy_030(const RealType* const lm){ // dy i j+1/2 k
+    const RealType dy_100 = lm[mapd(0,1,0,1)] ; //dy i j+1 k
+    const RealType dy_000 = lm[mapd(0,0,0,1)] ; //dy i j k
+
+    return 0.5 * (dy_100 + dy_000);
+  }
+
+  inline RealType dy_040(const RealType* const lm){ // dy i j-1/2 k
+    const RealType dy_200 = lm[mapd(0,-1,0,1)] ; //dy i j-1 k
+    const RealType dy_000 = lm[mapd(0,0,0,1)] ; //dy i j k
+
+    return 0.5 * (dy_200 + dy_000);
+  }
+
+  inline RealType dz_003(const RealType* const lm){ // dz i j k+1/2
+    const RealType dz_100 = lm[mapd(0,0,1,2)] ; //dz i j k+1
+    const RealType dz_000 = lm[mapd(0,0,0,2)] ; //dz i j k
+
+    return 0.5 * (dz_100 + dz_000);
+  }
+
+  inline RealType dz_004(const RealType* const lm){ // dz i j k-1/2
+    const RealType dz_200 = lm[mapd(0,0,-1,2)] ; //dz i j k-1
+    const RealType dz_000 = lm[mapd(0,0,0,2)] ;  //dz i j k
+
+    return 0.5 * (dz_200 + dz_000);
+  }
+
+  inline RealType F1(const RealType* const lv, const RealType* const lm, const RealType* const lnu){
+    const RealType dx_100 = lm[mapd(1,0,0,0)]; //dx i+1 j k
+    const RealType dx_000 = lm[mapd(0,0,0,0)]; //dx i j k
+    const RealType dx_p_half = dx_300(lm);     //dx i+1/2 j k
+
+    const RealType nu_100 = lnu[mapd(1, 0, 0, 0)]; //nu i+1 j k
+    const RealType nu_000 = lnu[mapd(0, 0, 0, 0)]; //nu i j k
+
+    const RealType u_100 = lv[mapd(1, 0, 0, 0)];  //u i+1 j k
+    const RealType u_000 = lv[mapd(0, 0, 0, 0)];  //u i j k
+    const RealType u_200 = lv[mapd(-1, 0, 0, 0)]; //u i-1 j k
+  
+    return 1/dx_p_half * (nu_100 * (u_100 - u_000)/dx_100  - nu_000*(u_000 - u_200)/dx_000 );
+  }
+
+  inline RealType F2(const RealType* const lv, const RealType* const lm, const RealType* const lnu){
+    const RealType dy_000 = lm[mapd(0,0,0,1)] ;  //dy i j k
+    const RealType dx_p_half = dx_300(lm) ;      //dx i+1/2 j k
+    const RealType dy_p_half = dy_030(lm);       //dy i j+1/2 k
+    const RealType dy_n_half = dy_040(lm);       //dy i j-1/2 k
+
+    const RealType nu_star_330 = nu_330(lm, lnu); //nu i+1/2 j+1/2 k
+    const RealType nu_star_340 = nu_340(lm, lnu); //nu i+1/2 j-1/2 k
+
+    const RealType u_010 = lv[mapd(0,1,0,0)];    //u i j+1 k
+    const RealType u_000 = lv[mapd(0,0,0,0)];    //u i j k
+    const RealType u_020 = lv[mapd(0,-1,0,0)];   //u i j-1 k
+
+    const RealType v_100 = lv[mapd(1,0,0,1)];   //v i+1 j k
+    const RealType v_000 = lv[mapd(0,0,0,1)];   //v i j k
+    const RealType v_120 = lv[mapd(1,-1,0,1)];  //v i+1 j-1 k
+    const RealType v_020 = lv[mapd(0,-1,0,1)];  //v i j-1 k 
+
+    return 1/dy_000 * ( nu_star_330 * ( (u_010 - u_000)/dy_p_half + (v_100 - v_000)/dx_p_half ) - nu_star_340 * ( (u_000 - u_020)/dy_n_half + (v_120 - v_020)/dx_p_half) ); 
+  }
+
+  inline RealType F3(const RealType* const lv, const RealType* const lm, const RealType* const lnu){
+    const RealType dz_000 = lm[mapd(0,0,0,2)];  //dz i j k
+    const RealType dx_p_half = dx_300(lm);      //dx i+1/2 j k
+    const RealType dz_p_half = dz_003(lm);      //dz i j k+1/2
+    const RealType dz_n_half = dz_004(lm);      //dz i j k-1/2
+
+    const RealType nu_star_303 = nu_303(lm, lnu); //nu i+1/2 j k+1/2
+    const RealType nu_star_304 = nu_304(lm, lnu); //nu i+1/2 j k-1/2
+
+    const RealType u_001 = lv[mapd(0,0,1,0)];    //u i j k+1
+    const RealType u_000 = lv[mapd(0,0,0,0)];    //u i j k
+    const RealType u_002 = lv[mapd(0,0,-1,0)];   //u i j k-1
+
+    const RealType w_100 = lv[mapd(1,0,0,2)];   //w i+1 j k
+    const RealType w_000 = lv[mapd(0,0,0,2)];   //w i j k
+    const RealType w_102 = lv[mapd(1,0,-1,2)];  //w i+1 j k-1
+    const RealType w_002 = lv[mapd(0,0,-1,2)];  //w i j k-1
     
-    return 2.0 * (
-        nu_star_p * (u1 - u0) / (dx_p * (dx_p + dx_n)) -
-        nu_star_n * (u0 - u2) / (dx_n * (dx_p + dx_n))
-    );
-}
+    return 1/dz_000 * ( nu_star_303 * ( (u_001 - u_000)/dz_p_half + (w_100 - w_000)/dx_p_half ) - nu_star_304 * ( (u_000 - u_002)/dz_n_half + (w_102 - w_002)/dx_p_half) ); 
+  }
 
+  inline RealType G1(const RealType* const lv, const RealType* const lm, const RealType* const lnu){
+    const RealType dx_000 = lm[mapd(0,0,0,0)];  //dx i j k
+    const RealType dx_p_half = dx_300(lm);      //dx i+1/2 j k
+    const RealType dx_n_half = dx_400(lm);      //dx i-1/2 j k
+    const RealType dy_p_half = dy_030(lm);      //dy i j+1/2 k
 
- //du/dy2
- inline RealType diffusiveUy2(FlowField& flowField,const RealType* const lv, const RealType* const lm, const Parameters& parameters, int i, int j, int k) {
-    const RealType u0 = lv[mapd(0, 0, 0, 0)];
-    const RealType u1 = lv[mapd(0, 1, 0, 0)];
-    const RealType u2 = lv[mapd(0, -1, 0, 0)];
-    const RealType dy_n = lm[mapd(0, 0, 0, 1)];
-    const RealType dy_p = lm[mapd(0, 1, 0, 1)];
+    const RealType nu_star_330 = nu_330(lm, lnu); //nu i+1/2 j+1/2 k
+    const RealType nu_star_430 = nu_430(lm, lnu); //nu i-1/2 j+1/2 k
 
-    const RealType nu_star_n = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i, j - 1, k);
-    const RealType nu_star_p = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i, j + 1, k);
+    const RealType v_100 = lv[mapd(0,0,0,1)];   //v i+1 j k
+    const RealType v_000 = lv[mapd(0,0,0,1)];   //v i j k
+    const RealType v_200 = lv[mapd(0,0,0,1)];   //v i-1 j k
 
-    return 2.0 * (
-        nu_star_p * (u1 - u0) / (dy_p * (dy_p + dy_n)) -
-        nu_star_n * (u0 - u2) / (dy_n * (dy_p + dy_n))
-    );
-}
+    const RealType u_010 = lv[mapd(0,0,0,0)];   //u i j+1 k
+    const RealType u_000 = lv[mapd(0,0,0,0)];   //u i j k
+    const RealType u_210 = lv[mapd(0,0,0,0)];   //u i-1 j+1 k
+    const RealType u_200 = lv[mapd(0,0,0,0)];   //u i-1 j k
 
+    return 1/dx_000 * ( nu_star_330 * ( (v_100 - v_000)/dx_p_half + (u_010 - u_000)/dy_p_half ) - nu_star_430 * ( (v_000 - v_200)/dx_n_half + (u_210 - u_200)/dy_p_half) ); 
+  }
+
+  inline RealType G2(const RealType* const lv, const RealType* const lm, const RealType* const lnu){
+    const RealType dy_010 = lm[mapd(0,1,0,1)]; //dy i j+1 k
+    const RealType dy_000 = lm[mapd(0,0,0,1)]; //dy i j k
+    const RealType dy_p_half = dy_030(lm);     //dy i j+1/2 k
+
+    const RealType nu_010 = lnu[mapd(0, 1, 0, 0)]; //nu i j+1 k
+    const RealType nu_000 = lnu[mapd(0, 0, 0, 0)]; //nu i j k
+
+    const RealType v_010 = lv[mapd(0, 1, 0, 0)];  //u i j+1 k
+    const RealType v_000 = lv[mapd(0, 0, 0, 0)];  //u i j k
+    const RealType v_020 = lv[mapd(0, -1, 0, 0)]; //u i j-1 k
+  
+    return 1/dy_p_half * (nu_010 * (v_010 - v_000)/dy_010  - nu_000*(v_000 - v_020)/dy_000 );
+  }
+
+  inline RealType G3(const RealType* const lv, const RealType* const lm, const RealType* const lnu){
+    const RealType dz_000 = lm[mapd(0,0,0,2)];  //dz i j k
+    const RealType dy_p_half = dy_030(lm);      //dy i j+1/2 k
+    const RealType dz_p_half = dz_003(lm);      //dz i j k+1/2
+    const RealType dz_n_half = dz_004(lm);      //dz i j k-1/2
+
+    const RealType nu_star_033 = nu_033(lm, lnu); //nu i+1/2 j k+1/2
+    const RealType nu_star_034 = nu_034(lm, lnu); //nu i+1/2 j k-1/2
+
+    const RealType v_001 = lv[mapd(0,0,1,2)];    //v i j k+1
+    const RealType v_000 = lv[mapd(0,0,0,2)];    //v i j k
+    const RealType v_002 = lv[mapd(0,0,-1,2)];   //v i j k-1
+
+    const RealType w_010 = lv[mapd(0,1,0,2)];   //w i j+1 k
+    const RealType w_000 = lv[mapd(0,0,0,2)];   //w i j k
+    const RealType w_012 = lv[mapd(0,1,-1,2)];  //w i j+1 k-1
+    const RealType w_002 = lv[mapd(0,0,-1,2)];  //w i j k-1
+    
+    return 1/dz_000 * ( nu_star_033 * ( (v_001 - v_000)/dz_p_half + (w_010 - w_000)/dy_p_half ) - nu_star_034 * ( (v_000 - v_002)/dz_n_half + (w_012 - w_002)/dy_p_half) ); 
+  }
+
+  inline RealType H1(const RealType* const lv, const RealType* const lm, const RealType* const lnu){
+    const RealType dx_000 = lm[mapd(0,0,0,0)]; //dx i j k
+    const RealType dx_p_half = dx_300(lm);     //dx i+1/2 j k
+    const RealType dx_n_half = dx_400(lm);     //dx i-1/2 j k
+    const RealType dz_p_half = dz_003(lm);     //dz i j k+1/2
+
+    const RealType nu_star_303 = nu_303(lm, lnu); //nu i+1/2 j k+1/2
+    const RealType nu_star_403 = nu_403(lm, lnu); //nu i-1/2 j k+1/2
+
+    const RealType w_100 = lv[mapd(1,0,0,2)];  //w i+1 j k
+    const RealType w_000 = lv[mapd(0,0,0,2)];  //w i j k
+    const RealType w_200 = lv[mapd(-1,0,0,2)]; //w i-1 j k
+
+    const RealType u_001 = lv[mapd(0,0,0,0)];  //u i j k+1
+    const RealType u_000 = lv[mapd(0,0,0,0)];  //u i j k
+    const RealType u_201 = lv[mapd(0,0,0,0)];  //u i-1 j k+1
+    const RealType u_200 = lv[mapd(0,0,0,0)];  //u i-1 j k
+
+    return 1/dx_000 * ( nu_star_303 * ( (w_100 - w_000)/dx_p_half + (u_001 - u_000)/dz_p_half ) - nu_star_403 * ( (w_000 - w_200)/dx_n_half + (u_201 - u_200)/dz_p_half ) );
+  }
+
+  inline RealType H2(const RealType* const lv, const RealType* const lm, const RealType* const lnu){
+    const RealType dy_000 = lm[mapd(0,0,0,1)]; //dy i j k
+    const RealType dy_p_half = dy_030(lm);     //dy i j+1/2 k
+    const RealType dy_n_half = dy_040(lm);     //dy i j-1/2 k
+    const RealType dz_p_half = dz_003(lm);     //dz i j k+1/2
+
+    const RealType nu_star_033 = nu_033(lm, lnu); //nu i j+1/2 k+1/2
+    const RealType nu_star_043 = nu_043(lm, lnu); //nu i j-1/2 k+1/2
+
+    const RealType w_010 = lv[mapd(0,1,0,2)];  //w i j+1 k
+    const RealType w_000 = lv[mapd(0,0,0,2)];  //w i j k
+    const RealType w_020 = lv[mapd(0,-1,0,2)]; //w i j-1 k
+
+    const RealType v_001 = lv[mapd(0,0,1,1)];   //v i j k+1
+    const RealType v_000 = lv[mapd(0,0,0,1)];   //v i j k
+    const RealType v_021 = lv[mapd(0,-1,1,1)];  //v i j-1 k+1
+    const RealType v_020 = lv[mapd(0,-1,0,1)];  //v i j-1 k
+
+    return 1/dy_000 * ( nu_star_033 * ( (w_010 - w_000)/dy_p_half + (v_001 - v_000)/dz_p_half ) - nu_star_043 * ( (w_000 - w_020)/dy_n_half + (v_021 - v_020)/dz_p_half ) );
+  }
+
+  inline RealType H3(const RealType* const lv, const RealType* const lm, const RealType* const lnu){
+    const RealType dz_p_half = dz_003(lm);     //dz i j k+1/2
+    const RealType dz_001 = lm[mapd(0,0,1,2)]; //dz i j k+1
+    const RealType dz_000 = lm[mapd(0,0,0,2)]; //dz i j k
+
+    const RealType nu_001 = lnu[mapd(0,0,1,0)];  //nu i j k+1
+    const RealType nu_000 = lnu[mapd(0,0,0,0)];  //nu i j k
+
+    const RealType w_001 = lv[mapd(0,0,1,2)]; //w i j k+1
+    const RealType w_000 = lv[mapd(0,0,0,2)]; //w i j k
+    const RealType w_002 = lv[mapd(0,0,-1,2)]; //w i j k-1
+
+    return 1/dz_p_half * ( nu_001 * (w_001 - w_000)/dz_001 - nu_000 * (w_000 - w_002)/dz_000 );
+  }
  
- //du/dz2
- inline RealType diffusiveUz2(FlowField& flowField ,const RealType* const lv, const RealType* const lm, const Parameters& parameters, int i, int j, int k) {
-    const RealType u0 = lv[mapd(0, 0, 0, 0)];
-    const RealType u1 = lv[mapd(0, 0, 1, 0)];
-    const RealType u2 = lv[mapd(0, 0, -1, 0)];
-    const RealType dz_n = lm[mapd(0, 0, 0, 2)];
-    const RealType dz_p = lm[mapd(0, 0, 1, 2)];
-
-    const RealType nu_star_p = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i, j, k + 1);
-    const RealType nu_star_n = 1.0 / parameters.flow.Re + flowField.getTurbulentViscosity().getScalar(i, j, k - 1);
-
-    return 2.0 * (
-        nu_star_p * (u1 - u0) / (dz_p * (dz_p + dz_n)) -
-        nu_star_n * (u0 - u2) / (dz_n * (dz_p + dz_n))
-    );
-}
-////////////////////////////////////////////////////////////////////////////////////////
-// This function calculates the cross derivatives of u and v (with turbulent viscosity ν* averaged over cell interfaces) for non-uniform grids
-
-// Calculate the turbulent viscosity (ν*) at the i+1/2 and i-1/2 points for non-uniform grids
-inline RealType computeNuStarNonUniform(const RealType* const nu, const int i, const int j, const int k) {
-    // ν* averaged at cell interfaces i+1/2, j+1/2, etc.
-    RealType nu_star_ip_1_2 = 0.25 * (nu[mapd(i+1, j+1, k)] + nu[mapd(i, j+1, k)] + nu[mapd(i+1, j, k)] + nu[mapd(i, j, k)]);
-    RealType nu_star_im_1_2 = 0.25 * (nu[mapd(i-1, j+1, k)] + nu[mapd(i, j+1, k)] + nu[mapd(i-1, j, k)] + nu[mapd(i, j, k)]);
-    RealType nu_star_jp_1_2 = 0.25 * (nu[mapd(i+1, j+1, k)] + nu[mapd(i+1, j, k)] + nu[mapd(i, j+1, k)] + nu[mapd(i, j, k)]);
-    RealType nu_star_jm_1_2 = 0.25 * (nu[mapd(i+1, j-1, k)] + nu[mapd(i+1, j, k)] + nu[mapd(i, j-1, k)] + nu[mapd(i, j, k)]);
-    
-    // Average the values for the final turbulent viscosity at cell interfaces
-    RealType nu_star = (nu_star_ip_1_2 + nu_star_im_1_2 + nu_star_jp_1_2 + nu_star_jm_1_2) / 4.0;
-    
-    return nu_star;
-}
-
-// Calculate the derivative of (ν* ∂u/∂y + ν* ∂v/∂x) with respect to y, considering non-uniform grid spacings
-inline RealType diffusiveUYVXYNonUniform(const RealType* const lv, const RealType* const lm, const RealType* const nu, const int i, const int j, const int k) {
-    RealType nu_star = computeNuStarNonUniform(nu, i, j, k); // Compute the viscosity at the center of the cells
-    
-    // Calculate the gradients considering non-uniform grid spacings
-    RealType dudy_y_p = (lv[mapd(i, j+1, k)] - lv[mapd(i, j, k)]) / lm[mapd(i, j+1, k)]; // ∂u/∂y
-    RealType dudy_y_m = (lv[mapd(i, j, k)] - lv[mapd(i, j-1, k)]) / lm[mapd(i, j, k)]; // ∂u/∂y
-    
-    RealType dvdx_x_p = (lv[mapd(i+1, j, k)] - lv[mapd(i, j, k)]) / lm[mapd(i+1, j, k)]; // ∂v/∂x
-    RealType dvdx_x_m = (lv[mapd(i, j, k)] - lv[mapd(i-1, j, k)]) / lm[mapd(i, j, k)]; // ∂v/∂x
-
-    // Compute the cross derivative term (evaluated at i+1/2, j+1/2) for cell interfaces
-    RealType term_pos = nu_star * (dudy_y_p + dvdx_x_p);
-    RealType term_neg = nu_star * (dudy_y_m + dvdx_x_m);
-
-    return (term_pos - term_neg) / lm[mapd(i, j+1, k)];  // Final result, using the non-uniform grid spacing
-}
-
-////////////////////////////////////////////////////////////////////////////////////////
-// Similarly, for other cross derivatives (u-v, v-w, etc.), you can define functions like diffusiveVXY, diffusiveWXZ, etc.
-// This code assumes the lm array stores the non-uniform grid spacings (delta_x, delta_y, etc. at each cell).
-
-
- //d/dy(du/dy + dv/dx)
- inline RealType diffusiveCoupledUYV(const RealType* const lv, const RealType* const lm, const RealType nu, 
-  const RealType nu_t, const RealType Re) {
-    // Grid spacings
-    const RealType dy_p = lm[mapd(0, 1, 0, 1)];   // dy+
-    const RealType dy_n = lm[mapd(0, 0, 0, 1)];   // dy-
-    const RealType dx_p = lm[mapd(1, 0, 0, 0)];   // dx+
-    const RealType dx_n = lm[mapd(0, 0, 0, 0)];   // dx-
-
-    // Velocity components
-    const RealType u0 = lv[mapd(0, 0, 0, 0)];     // u(i, j)
-    const RealType u1 = lv[mapd(0, 1, 0, 0)];     // u(i, j+1)
-    const RealType u2 = lv[mapd(0, -1, 0, 0)];    // u(i, j-1)
-
-    const RealType v0 = lv[mapd(0, 0, 0, 1)];     // v(i, j)
-    const RealType v1 = lv[mapd(1, 0, 0, 1)];     // v(i+1, j)
-    const RealType v2 = lv[mapd(-1, 0, 0, 1)];    // v(i-1, j)
-
-    // Neighboring turbulent viscosities
-    const RealType nu_t_ij = nu_t;                       // νT at (i, j)
-    const RealType nu_t_ipj = nu_t;                      // νT at (i+1, j)
-    const RealType nu_t_imj = nu_t;                      // νT at (i-1, j)
-    const RealType nu_t_ijp = nu_t;                      // νT at (i, j+1)
-    const RealType nu_t_ijm = nu_t;                      // νT at (i, j-1)
-
-    // Calculate ν* at intermediate points
-    // ν* at (i+1/2, j+1/2)
-    const RealType nu_star_pxp = 0.25 * (
-        (nu + nu_t_ij) + (nu + nu_t_ipj) + (nu + nu_t_ijp) + (nu + nu_t_ipj)
-    ) + 1.0 / Re;
-
-    // ν* at (i-1/2, j+1/2)
-    const RealType nu_star_nxp = 0.25 * (
-        (nu + nu_t_ij) + (nu + nu_t_imj) + (nu + nu_t_ijp) + (nu + nu_t_imj)
-    ) + 1.0 / Re;
-
-    // ν* at (i+1/2, j-1/2)
-    const RealType nu_star_pxn = 0.25 * (
-        (nu + nu_t_ij) + (nu + nu_t_ipj) + (nu + nu_t_ijm) + (nu + nu_t_ipj)
-    ) + 1.0 / Re;
-
-    // ν* at (i-1/2, j-1/2)
-    const RealType nu_star_nxn = 0.25 * (
-        (nu + nu_t_ij) + (nu + nu_t_imj) + (nu + nu_t_ijm) + (nu + nu_t_imj)
-    ) + 1.0 / Re;
-
-    // Centered gradients of u w.r.t y
-    const RealType du_dy_p = (u1 - u0) / dy_p;    // ∂u/∂y at j+1/2
-    const RealType du_dy_n = (u0 - u2) / dy_n;    // ∂u/∂y at j-1/2
-
-    // Centered gradients of v w.r.t x
-    const RealType dv_dx_p = (v1 - v0) / dx_p;    // ∂v/∂x at i+1/2
-    const RealType dv_dx_n = (v0 - v2) / dx_n;    // ∂v/∂x at i-1/2
-
-    // Divergence terms
-    const RealType div_term_p = nu_star_pxp * (du_dy_p + dv_dx_p) - 
-                                nu_star_nxp * (du_dy_p + dv_dx_n); // At j+1/2
-
-    const RealType div_term_n = nu_star_pxn * (du_dy_n + dv_dx_p) - 
-                                nu_star_nxn * (du_dy_n + dv_dx_n); // At j-1/2
-
-    // Final derivative w.r.t. y
-    return (div_term_p - div_term_n) / (0.5 * (dy_p + dy_n));
-}
-
- 
- 
-
   inline RealType computeF2D(
     const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt
   ) {
@@ -1076,4 +1379,32 @@ inline RealType diffusiveUYVXYNonUniform(const RealType* const lv, const RealTyp
             - dvwdy(localVelocity, parameters, localMeshsize) + parameters.environment.gz);
   }
 
+  //! Compute FGH for WS2
+  inline RealType computeTurbulentF2D(const RealType* const localVelocity, const RealType* const localMeshsize, const RealType* const localViscosity,  const Parameters& parameters, RealType dt ){
+    return localVelocity[mapd(0, 0, 0, 0)]
+        + dt * (2.0 * F1(localVelocity, localMeshsize, localViscosity) + F2(localVelocity, localMeshsize, localViscosity) - du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize) + parameters.environment.gx);
+  }
+
+  inline RealType computeTurbulentG2D(const RealType* const localVelocity, const RealType* const localMeshsize, const RealType* const localViscosity,  const Parameters& parameters, RealType dt ){
+    return localVelocity[mapd(0, 0, 0, 1)]
+        + dt * (G1(localVelocity, localMeshsize, localViscosity) + 2.0*G2(localVelocity, localMeshsize, localViscosity) - dv2dy(localVelocity, parameters, localMeshsize) - duvdx(localVelocity, parameters, localMeshsize) + parameters.environment.gy);
+  }
+
+  inline RealType computeTurbulentF3D(const RealType* const localVelocity, const RealType* const localMeshsize, const RealType* const localViscosity,  const Parameters& parameters, RealType dt ){
+    return localVelocity[mapd(0, 0, 0, 0)]
+        + dt * (2.0*F1(localVelocity, localMeshsize, localViscosity) + F2(localVelocity, localMeshsize, localViscosity) + F3(localVelocity, localMeshsize, localViscosity) -du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize)
+            - duwdz(localVelocity, parameters, localMeshsize) + parameters.environment.gx);
+  }
+
+  inline RealType computeTurbulentG3D(const RealType* const localVelocity, const RealType* const localMeshsize, const RealType* const localViscosity,  const Parameters& parameters, RealType dt ){
+  return localVelocity[mapd(0, 0, 0, 1)]
+        + dt * (G1(localVelocity, localMeshsize, localViscosity) + 2.0*G2(localVelocity, localMeshsize, localViscosity) + G3(localVelocity, localMeshsize, localViscosity) - dv2dy(localVelocity, parameters, localMeshsize) - duvdx(localVelocity, parameters, localMeshsize)
+            - dvwdz(localVelocity, parameters, localMeshsize) + parameters.environment.gy);
+  }
+
+  inline RealType computeTurbulentH3D(const RealType* const localVelocity, const RealType* const localMeshsize, const RealType* const localViscosity,  const Parameters& parameters, RealType dt ){
+  return localVelocity[mapd(0, 0, 0, 2)]
+        + dt * (H1(localVelocity, localMeshsize, localViscosity) + H2(localVelocity, localMeshsize, localViscosity) + 2.0*H3(localVelocity, localMeshsize, localViscosity) -dw2dz(localVelocity, parameters, localMeshsize) - duwdx(localVelocity, parameters, localMeshsize)
+            - dvwdy(localVelocity, parameters, localMeshsize) + parameters.environment.gz);
+  }
 } // namespace Stencils
