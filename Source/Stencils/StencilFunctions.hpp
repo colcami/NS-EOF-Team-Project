@@ -78,18 +78,6 @@ namespace Stencils {
     }
   }
 
-  RealType computeShearRate(const RealType* lv, const RealType* lm) {
-    RealType S11 = dudx(lv, lm); // du/dx
-    RealType S22 = dvdy(lv, lm); // dv/dy
-    RealType S33 = dwdz(lv, lm); // dw/dz (zero in 2D)
-
-    RealType S12 = 0.5 * (dudy(lv, lm) + dvdx(lv, lm)); // (du/dy + dv/dx)
-    RealType S13 = 0.5 * (dudz(lv, lm) + dwdx(lv, lm)); // (du/dz + dw/dx)
-    RealType S23 = 0.5 * (dvdz(lv, lm) + dwdy(lv, lm)); // (dv/dz + dw/dy)
-
-    return std::sqrt(2.0 * (S11 * S11 + S22 * S22 + S33 * S33 + 2.0 * (S12 * S12 + S13 * S13 + S23 * S23)));
-}
-
   // Maps an index and a component to the corresponding value in the cube.
   inline int mapd(int i, int j, int k, int component) { return 39 + 27 * k + 9 * j + 3 * i + component; }
 
@@ -898,6 +886,18 @@ namespace Stencils {
     const RealType dz_n = lm[mapd(0, 0, 0, 2)]; // dz-
     const RealType dz_p = lm[mapd(0, 0, 1, 2)]; // dz+
     return 2*( w1/(dz_p*(dz_p + dz_n)) - w0/(dz_n*dz_p) + w2/(dz_n*(dz_p + dz_n)));
+  }
+
+  RealType computeShearRate(const RealType* lv, const RealType* lm) {
+    RealType S11 = dudx(lv, lm); // du/dx
+    RealType S22 = dvdy(lv, lm); // dv/dy
+    RealType S33 = dwdz(lv, lm); // dw/dz (zero in 2D)
+
+    RealType S12 = 0.5 * (dudy(lv, lm) + dvdx(lv, lm)); // (du/dy + dv/dx)
+    RealType S13 = 0.5 * (dudz(lv, lm) + dwdx(lv, lm)); // (du/dz + dw/dx)
+    RealType S23 = 0.5 * (dvdz(lv, lm) + dwdy(lv, lm)); // (dv/dz + dw/dy)
+
+    return std::sqrt(2.0 * (S11 * S11 + S22 * S22 + S33 * S33 + 2.0 * (S12 * S12 + S13 * S13 + S23 * S23)));
   }
 
     // ! WS2 functions

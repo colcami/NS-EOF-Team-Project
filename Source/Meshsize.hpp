@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Definitions.hpp"
+#include <cmath> // For std::tanh
 #include <stdexcept>
 
 // Forward declaration of Parameters

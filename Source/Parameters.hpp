@@ -4,6 +4,10 @@
 #include "Definitions.hpp"
 #include "Meshsize.hpp"
 #include <string>
+#include <petsc.h>
+#include <mpi.h>
+// #include <petscsys.h>
+#include "StdAfx.hpp"
 
 //! Classes for the parts of the parameters
 //@{
