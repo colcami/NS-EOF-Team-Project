@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Definitions.hpp"
+#include <stdexcept>
 
 // Forward declaration of Parameters
 class Parameters;

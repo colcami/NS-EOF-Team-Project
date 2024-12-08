@@ -45,9 +45,6 @@ protected:
   Stencils::ObstacleStencil obstacleStencil_;
   FieldIterator<FlowField>  velocityIterator_;
   FieldIterator<FlowField>  obstacleIterator_;
-
-  Stencils::WallDistanceStencil wallDistanceStencil_;
-  Stencils::VTKWallDistanceStencil vtkWallDistanceStencil_;
   std::unique_ptr<Solvers::LinearSolver> solver_;
 
   virtual void setTimeStep();

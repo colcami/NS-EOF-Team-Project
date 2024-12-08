@@ -21,6 +21,10 @@
 #include "Stencils/VelocityStencil.hpp"
 #include "Stencils/VTKStencil.hpp"
 #include "Stencils/TurbulentFGHStencil.hpp"
+#include "Stencils/NuTurbulentStencil.hpp"
+#include "Stencils/VTKTurbulentViscosityStencil.hpp"
+#include "Stencils/VTKWallDistanceStencil.hpp"
+#include "Stencils/WallDistanceStencil.hpp"
 
 class TurbulentSimulation : public Simulation {
 protected:
@@ -28,9 +32,21 @@ protected:
   TurbulentFlowField& flowField_;
 
   //! CHANGE THE FGH STENCIL
-  Stencils::TurbulentFGHStencil TfghStencil_;
+  Stencils::TurbulentFGHStencil          TfghStencil_;
   FieldIterator<TurbulentFlowField>      fghIterator_;
 
+  Stencils::WallDistanceStencil      wallDistanceStencil_;
+  FieldIterator<TurbulentFlowField>  wallDistanceIterator_;
+
+  Stencils::VTKWallDistanceStencil   vtkWallDistanceStencil_;
+  FieldIterator<TurbulentFlowField>  vtkWallDistanceIterator_;
+
+  Stencils::NuTurbulentStencil       NuTurbulentStencil_;
+  FieldIterator<TurbulentFlowField>  NuTurbulentIterator_;
+
+  Stencils::VTKTurbulentViscosityStencil vtkTurbulentViscosityStencil_;
+  FieldIterator<TurbulentFlowField>       vtkTurbulentViscosityIterator_;
+  
   void setTimeStep() override;
 
 public:

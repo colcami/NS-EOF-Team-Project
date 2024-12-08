@@ -5,6 +5,7 @@
 #include <limits>
 
 namespace Stencils {
+
 ObstacleStencil::ObstacleStencil(const Parameters& parameters):
   FieldStencil<FlowField>(parameters) {}
 
@@ -49,33 +50,10 @@ void Stencils::ObstacleStencil::apply(FlowField& flowField, int i, int j) {
     if ((obstacle & OBSTACLE_TOP) == 0) {
       velocity.getVector(i, j)[1] = 0.0;
     }
+  
   }
-// --- New Minimal Distance Calculation ---
-    if (minimalDistances2D.empty()) {
-        initializeDistances2D(flowField.getNx(), flowField.getNy());
-    }
-
-    if ((obstacle & OBSTACLE_SELF) == 1) {
-        minimalDistances2D[i][j] = 0.0; // Obstacle cells have zero distance
-    } else {
-        for (int di = -1; di <= 1; ++di) {
-            for (int dj = -1; dj <= 1; ++dj) {
-                int ni = i + di;
-                int nj = j + dj;
-
-                // Check bounds
-                if (ni >= 0 && ni < flowField.getNx() && nj >= 0 && nj < flowField.getNy()) {
-                    if ((flowField.getFlags().getValue(ni, nj) & OBSTACLE_SELF) == 1) {
-                        const RealType dx = parameters_.meshsize->getDx(i, j);
-                        const RealType dy = parameters_.meshsize->getDy(i, j);
-                        RealType dist = std::sqrt(di * di * dx * dx + dj * dj * dy * dy);
-                        minimalDistances2D[i][j] = std::min(minimalDistances2D[i][j], dist);
-                    }
-                }
-            }
-        }
-    }
 }
+
 
 
 void Stencils::ObstacleStencil::apply(FlowField& flowField, int i, int j, int k) {
@@ -137,46 +115,6 @@ void Stencils::ObstacleStencil::apply(FlowField& flowField, int i, int j, int k)
       velocity.getVector(i, j, k)[2] = 0.0;
     }
   }
-// Minimal distance computation
-    if (minimalDistances3D.empty()) {
-        initializeDistances3D(flowField.getNx(), flowField.getNy(), flowField.getNz());
+
     }
-
-    if ((obstacle & OBSTACLE_SELF) == 1) {
-        minimalDistances3D[i][j][k] = 0.0; // Obstacle cells have zero distance
-    } else {
-        for (int di = -1; di <= 1; ++di) {
-            for (int dj = -1; dj <= 1; ++dj) {
-                for (int dk = -1; dk <= 1; ++dk) {
-                    int ni = i + di;
-                    int nj = j + dj;
-                    int nk = k + dk;
-
-                    if (ni >= 0 && ni < flowField.getNx() &&
-                        nj >= 0 && nj < flowField.getNy() &&
-                        nk >= 0 && nk < flowField.getNz()) {
-                        if ((flowField.getFlags().getValue(ni, nj, nk) & OBSTACLE_SELF) == 1) {
-                            const RealType dx = parameters_.meshsize->getDx(i, j, k);
-                            const RealType dy = parameters_.meshsize->getDy(i, j, k);
-                            const RealType dz = parameters_.meshsize->getDz(i, j, k);
-                            RealType dist = std::sqrt(di * di * dx * dx +
-                                                      dj * dj * dy * dy +
-                                                      dk * dk * dz * dz);
-                            minimalDistances3D[i][j][k] = std::min(minimalDistances3D[i][j][k], dist);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-// Get minimal distance
-RealType ObstacleStencil::getMinimalDistance(int i, int j) const {
-    return minimalDistances2D[i][j];
-}
-
-RealType ObstacleStencil::getMinimalDistance(int i, int j, int k) const {
-    return minimalDistances3D[i][j][k];
-}
-
 }

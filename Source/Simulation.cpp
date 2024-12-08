@@ -23,9 +23,7 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   velocityStencil_(parameters),
   obstacleStencil_(parameters),
   velocityIterator_(flowField_, parameters, velocityStencil_),
-  obstacleIterator_(flowField_, parameters, obstacleStencil_),
-  wallDistanceStencil_(parameters),
-  vtkWallDistanceStencil_(parameters)
+  obstacleIterator_(flowField_, parameters, obstacleStencil_)
 #ifdef ENABLE_PETSC
   ,
   solver_(std::make_unique<Solvers::PetscSolver>(flowField_, parameters))
@@ -76,9 +74,6 @@ void Simulation::initializeFlowField() {
 
   solver_->reInitMatrix();
 
-  // Apply the wall distance stencil
-    FieldIterator<FlowField> wallDistanceIterator(flowField_, parameters_, wallDistanceStencil_);
-    wallDistanceIterator.iterate(); 
 }
 
 void Simulation::solveTimestep() {
@@ -106,11 +101,7 @@ void Simulation::plotVTK(int timeStep, RealType simulationTime) {
   FieldIterator<FlowField> vtkIterator(flowField_, parameters_, vtkStencil, 1, 0);
   vtkIterator.iterate();
   vtkStencil.write(flowField_, timeStep, simulationTime);
-
-  // Ensure wall distance data is iterated and exported
-  FieldIterator<FlowField> vtkWallDistanceIterator(flowField_, parameters_, vtkWallDistanceStencil_, 1, 0);
-  vtkWallDistanceIterator.iterate();
-  vtkWallDistanceStencil_.write(flowField_, timeStep, simulationTime); 
+  
 }
 
 void Simulation::setTimeStep() {

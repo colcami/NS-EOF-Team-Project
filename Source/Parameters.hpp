@@ -3,6 +3,7 @@
 #include "BoundaryType.hpp"
 #include "Definitions.hpp"
 #include "Meshsize.hpp"
+#include <string>
 
 //! Classes for the parts of the parameters
 //@{

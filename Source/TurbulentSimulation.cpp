@@ -10,8 +10,15 @@ TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowFi
   flowField_(TflowField),
   // ! FGH STENCIL
   TfghStencil_(parameters),
-  fghIterator_(flowField_, parameters, TfghStencil_)
-
+  fghIterator_(flowField_, parameters, TfghStencil_),
+  wallDistanceStencil_(parameters),
+  wallDistanceIterator_(TflowField, parameters, wallDistanceStencil_),
+  vtkWallDistanceStencil_(parameters),
+  vtkWallDistanceIterator_(TflowField, parameters, vtkWallDistanceStencil_),
+  NuTurbulentStencil_(parameters),
+  NuTurbulentIterator_(TflowField, parameters, NuTurbulentStencil_),
+  vtkTurbulentViscosityStencil_(parameters),
+  vtkTurbulentViscosityIterator_(TflowField, parameters, vtkTurbulentViscosityStencil_)
 {
 }
 
@@ -19,7 +26,7 @@ void TurbulentSimulation::initializeFlowField() {
   if (parameters_.simulation.scenario == "taylor-green") {
     // Currently, a particular initialisation is only required for the taylor-green vortex.
     Stencils::InitTaylorGreenFlowFieldStencil stencil(parameters_);
-    FieldIterator<FlowField>                  iterator(flowField_, parameters_, stencil);
+    FieldIterator<FlowField>         iterator(flowField_, parameters_, stencil);
     iterator.iterate();
   } else if (parameters_.simulation.scenario == "channel") {
     Stencils::BFStepInitStencil stencil(parameters_);
@@ -70,9 +77,13 @@ void TurbulentSimulation::solveTimestep() {
   // Compute velocity
   velocityIterator_.iterate();
   obstacleIterator_.iterate();
+// Apply the wall distance stencil  
+  wallDistanceIterator_.iterate();
+  NuTurbulentIterator_.iterate();
   // TODO WS2: communicate velocity values
   // Iterate for velocities on the boundary
   wallVelocityIterator_.iterate();
+  
 }
 
 void TurbulentSimulation::plotVTK(int timeStep, RealType simulationTime) {
@@ -81,6 +92,9 @@ void TurbulentSimulation::plotVTK(int timeStep, RealType simulationTime) {
 
   vtkIterator.iterate();
   vtkStencil.write(flowField_, timeStep, simulationTime);
+
+  vtkWallDistanceIterator_.iterate();
+  vtkWallDistanceStencil_.write(flowField_, timeStep, simulationTime);
 }
 
 void TurbulentSimulation::setTimeStep() {
