@@ -1,4 +1,4 @@
-/* #include "VTKTurbulentViscosityStencil.hpp"
+#include "VTKTurbulentViscosity.hpp"
 
 namespace Stencils {
 

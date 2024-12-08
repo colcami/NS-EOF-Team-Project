@@ -173,3 +173,4 @@ void WallDistanceStencil::apply3D(FlowField& flowField, int i, int j, int k) {
 }
 
 } // namespace Stencils
+

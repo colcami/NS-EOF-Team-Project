@@ -2,32 +2,17 @@
 
 #include "DataStructures.hpp"
 #include "Parameters.hpp"
+#include "FlowField.hpp"
 
 /** Flow field
  *
  * Class intended to contain the state of the domain.
  */
-class FlowField {
+class TurbulentFlowField : public FlowField {
 private:
-  const int sizeX_; //! Size in the X direction
-  const int sizeY_; //! Size in the Y direction
-  const int sizeZ_; //! Size in the Z direction
-
-  const int cellsX_;
-  const int cellsY_;
-  const int cellsZ_;
-
-  ScalarField pressure_; //! Scalar field representing the pressure
-  VectorField velocity_; //! Multicomponent field representing velocity
-
-  IntScalarField flags_; //! Integer field for the flags
-
-  VectorField FGH_;
-  ScalarField RHS_; //! Right hand side for the Poisson equation
-  // New turbulence fields
-  // ScalarField h_;    //! Scalar field for the nearest wall distance
-  // ScalarField nu_t_; //! Scalar field for the turbulent viscosity
-  // ScalarField nu_star_; //! Scalar field for the total viscosity
+  ScalarField h_;    //! Scalar field for the nearest wall distance
+  ScalarField nu_t_; //! Scalar field for the turbulent viscosity
+  ScalarField nu_star_; //! Scalar field for the total viscosity
   
 public:
   /** Constructor for the 2D flow field
@@ -38,7 +23,7 @@ public:
    * @param Nx Size of the fuild domain (non-ghost cells), in the X direction
    * @param Ny Size of the fuild domain (non-ghost cells), in the Y direction
    */
-  FlowField(int Nx, int Ny);
+  TurbulentFlowField(int Nx, int Ny);
 
   /** Constructor for the 3D flow field
    *
@@ -49,7 +34,7 @@ public:
    * @param Ny Size of the fuild domain (non-ghost cells), in the Y direction
    * @param Nz Size of the fuild domain (non-ghost cells), in the Z direction
    */
-  FlowField(int Nx, int Ny, int Nz);
+  TurbulentFlowField(int Nx, int Ny, int Nz);
 
   /** Constructs a field from parameters object
    *
@@ -58,9 +43,9 @@ public:
    *
    * @param parameters Parameters object with geometric information
    */
-  FlowField(const Parameters& parameters);
+  TurbulentFlowField(const Parameters& parameters);
 
-  virtual ~FlowField() = default;
+  ~TurbulentFlowField() override = default;
 
   /** Obtain size in the X direction
    *
@@ -94,9 +79,9 @@ public:
   ScalarField& getRHS();
 
   // New getters for turbulence fields
-  // ScalarField& getWallDistance();
-  // ScalarField& getTurbulentViscosity();
-  // ScalarField& getTotalViscosity();
+  ScalarField& getWallDistance();
+  ScalarField& getTurbulentViscosity();
+  ScalarField& getTotalViscosity();
   
   void getPressureAndVelocity(RealType& pressure, RealType* const velocity, int i, int j);
   void getPressureAndVelocity(RealType& pressure, RealType* const velocity, int i, int j, int k);
