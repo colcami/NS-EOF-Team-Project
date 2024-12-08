@@ -60,7 +60,7 @@ namespace Stencils {
     }
   }
 
-  void loadLocalViscosity2D(TurbulentFlowField& TflowField, RealType* const localViscosity, int i, int j) {
+  inline void loadLocalViscosity2D(TurbulentFlowField& TflowField, RealType* const localViscosity, int i, int j) {
     for (int row = -1; row <= 1; row++) {
       for (int column = -1; column <= 1; column++) {
         localViscosity[39 + 9 * row + 3 * column] = TflowField.getTurbulentViscosity().getScalar(i + column, j + row);
@@ -68,7 +68,7 @@ namespace Stencils {
     }
   }
 
-  void loadLocalViscosity3D(TurbulentFlowField& TflowField, RealType* const localViscosity, int i, int j, int k){
+  inline void loadLocalViscosity3D(TurbulentFlowField& TflowField, RealType* const localViscosity, int i, int j, int k){
     for (int layer = -1; layer <= 1; layer++) {
       for (int row = -1; row <= 1; row++) {
         for (int column = -1; column <= 1; column++) {
@@ -888,7 +888,7 @@ namespace Stencils {
     return 2*( w1/(dz_p*(dz_p + dz_n)) - w0/(dz_n*dz_p) + w2/(dz_n*(dz_p + dz_n)));
   }
 
-  RealType computeShearRate(const RealType* lv, const RealType* lm) {
+  inline RealType computeShearRate(const RealType* lv, const RealType* lm) {
     RealType S11 = dudx(lv, lm); // du/dx
     RealType S22 = dvdy(lv, lm); // dv/dy
     RealType S33 = dwdz(lv, lm); // dw/dz (zero in 2D)

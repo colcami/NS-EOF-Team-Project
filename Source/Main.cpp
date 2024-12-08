@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
   }
   simulation->initializeFlowField();
 
-  flowField->getFlags().show();
+  // flowField->getFlags().show();
 
   RealType time       = 0.0;
   RealType timeVtk    = parameters.vtk.interval;
