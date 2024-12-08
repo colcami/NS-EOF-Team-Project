@@ -34,7 +34,7 @@
             <vector x="0" y="0" z="0" />
         </back>
     </walls>
-    <vtk interval="0.01">Cavity3D</vtk>
+    <vtk interval="0.01">Cavity3D_6x1x1</vtk>
     <stdOut interval="0.01" />
     <parallel numProcessorsX="6" numProcessorsY="1" numProcessorsZ="1" />
 </configuration>
