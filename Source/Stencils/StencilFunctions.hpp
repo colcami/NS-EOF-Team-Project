@@ -888,7 +888,16 @@ namespace Stencils {
     return 2*( w1/(dz_p*(dz_p + dz_n)) - w0/(dz_n*dz_p) + w2/(dz_n*(dz_p + dz_n)));
   }
 
-  inline RealType computeShearRate(const RealType* lv, const RealType* lm) {
+  inline RealType computeShearRate2D(const RealType* lv, const RealType* lm) {
+    RealType S11 = dudx(lv, lm); // du/dx
+    RealType S22 = dvdy(lv, lm); // dv/dy
+
+    RealType S12 = 0.5 * (dudy(lv, lm) + dvdx(lv, lm)); // (du/dy + dv/dx)
+   
+    return std::sqrt(2.0 * (S11 * S11 + S22 * S22 + 2.0 * (S12 * S12) ) );
+  }
+
+  inline RealType computeShearRate3D(const RealType* lv, const RealType* lm) {
     RealType S11 = dudx(lv, lm); // du/dx
     RealType S22 = dvdy(lv, lm); // dv/dy
     RealType S33 = dwdz(lv, lm); // dw/dz (zero in 2D)

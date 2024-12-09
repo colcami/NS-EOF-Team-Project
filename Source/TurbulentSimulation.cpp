@@ -69,6 +69,8 @@ void TurbulentSimulation::solveTimestep() {
   // Determine and set max. timestep which is allowed in this simulation
   setTimeStep();
   // Compute FGH //! FGH 
+  std::cout << "hello" << std::endl;
+  NuTurbulentIterator_.iterate();
   fghIterator_.iterate();
   // Set global boundary values
   wallFGHIterator_.iterate();
@@ -81,11 +83,9 @@ void TurbulentSimulation::solveTimestep() {
   velocityIterator_.iterate();
   obstacleIterator_.iterate();
 // Apply the wall distance stencil  
-  NuTurbulentIterator_.iterate();
   // TODO WS2: communicate velocity values
   // Iterate for velocities on the boundary
   wallVelocityIterator_.iterate();
-  
 }
 
 void TurbulentSimulation::plotVTK(int timeStep, RealType simulationTime) {
@@ -118,10 +118,12 @@ void TurbulentSimulation::setTimeStep() {
     parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[0]);
   }
 
+  RealType minimum_dt = timeStepStencil_.getdt();
+
   // localMin = std::min(parameters_.timestep.dt, std::min(std::min(parameters_.flow.Re/(2 * factor), 1.0 /
   // maxUStencil_.getMaxValues()[0]), 1.0 / maxUStencil_.getMaxValues()[1]));
   localMin = std::min(
-    parameters_.flow.Re / (2 * factor),
+    minimum_dt,
     std::min(
       parameters_.timestep.dt, std::min(1 / (maxUStencil_.getMaxValues()[0]), 1 / (maxUStencil_.getMaxValues()[1]))
     )
