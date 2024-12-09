@@ -39,11 +39,12 @@ void WallDistanceStencil::Distance(TurbulentFlowField& flowField, int i, int j){
     RealType y = parameters_.meshsize->getPosY(i, j);
 
     RealType distance = std::numeric_limits<RealType>::max();
+    ScalarField& nu_t = flowField.getTurbulentViscosity();
 
     if (scenario_ == "channel") {
         RealType toBottomWall = y;
         RealType toTopWall = lengthY_ - y;
-        distance = std::min(toBottomWall, toTopWall);
+        distance = std::min(toBottomWall, toTopWall);        
 
     } else if (scenario_ == "channelWithStep") {
          if (x <= xStep_ && y <= yStep_) {
@@ -84,6 +85,7 @@ void WallDistanceStencil::Distance(TurbulentFlowField& flowField, int i, int j){
     }
 
     flowField.getWallDistance().getScalar(i, j) = distance;
+    nu_t.getScalar(i, j) = 1 / FieldStencil::parameters_.flow.Re;
 }
 
 void WallDistanceStencil::Distance(TurbulentFlowField& flowField, int i, int j, int k){
@@ -92,6 +94,7 @@ void WallDistanceStencil::Distance(TurbulentFlowField& flowField, int i, int j, 
     RealType z = parameters_.meshsize->getPosZ(i, j, k);
 
     RealType distance = std::numeric_limits<RealType>::max();
+    ScalarField& nu_t = flowField.getTurbulentViscosity();
 
     if (scenario_ == "channel") {
         RealType toBottomWall = y;
@@ -149,12 +152,13 @@ void WallDistanceStencil::Distance(TurbulentFlowField& flowField, int i, int j, 
     }
 
     flowField.getWallDistance().getScalar(i, j, k) = distance;
+    nu_t.getScalar(i, j) = 1 / FieldStencil::parameters_.flow.Re;
 }
 
 // Apply stencil for 2D or 3D cases
   void WallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j) { Distance(flowField, i, j) ;}
 
-  void WallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j, int k) {Distance(flowField, i, j) ;}
+  void WallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j, int k) {Distance(flowField, i, j, k) ;}
 
   void WallDistanceStencil::applyLeftWall(TurbulentFlowField& flowField, int i, int j)  { Distance(flowField, i, j) ;}
   
