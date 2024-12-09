@@ -20,6 +20,9 @@
 #include "Stencils/VTKStencil.hpp"
 #include "Stencils/WallDistanceStencil.hpp"
 #include "Stencils/VTKWallDistanceStencil.hpp"
+#include "ParallelManagers/PetscParallelManager.hpp"
+#include "ParallelManagers/PetscParallelManager.cpp"
+
 class Simulation {
 protected:
   Parameters& parameters_;
@@ -46,6 +49,7 @@ protected:
   FieldIterator<FlowField>  velocityIterator_;
   FieldIterator<FlowField>  obstacleIterator_;
   std::unique_ptr<Solvers::LinearSolver> solver_;
+  ParallelManagers::PetscParallelManager<FlowField> petscParallelManager_;
 
   virtual void setTimeStep();
 
