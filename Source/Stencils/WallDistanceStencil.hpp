@@ -9,6 +9,7 @@
 #include <string>
 #include <limits>
 #include "Definitions.hpp"
+#include "BoundaryStencil.hpp"
 
 /** Stencil for calculating normal distances to the nearest wall
  *
@@ -27,11 +28,27 @@ private:
 
     void detectScenario(); //! Detect the scenario and initialize relevant parameters
 
+    void Distance(TurbulentFlowField& flowField, int i, int j);
+
+    void Distance(TurbulentFlowField& flowField, int i, int j, int k);
+
 public:
     WallDistanceStencil(const Parameters& parameters);
     ~WallDistanceStencil() override = default;
 
     void apply(TurbulentFlowField& flowField, int i, int j) override;       // Dispatch to apply2D or apply3D
     void apply(TurbulentFlowField& flowField, int i, int j, int k) override; // Dispatch to apply3D
+
+    void applyLeftWall(TurbulentFlowField& flowField, int i, int j);
+    void applyRightWall(TurbulentFlowField& flowField, int i, int j);
+    void applyBottomWall(TurbulentFlowField& flowField, int i, int j);
+    void applyTopWall(TurbulentFlowField& flowField, int i, int j);
+    
+    void applyLeftWall(TurbulentFlowField& flowField, int i, int j, int k) ;
+    void applyRightWall(TurbulentFlowField& flowField, int i, int j, int k) ;
+    void applyBottomWall(TurbulentFlowField& flowField, int i, int j, int k) ;
+    void applyTopWall(TurbulentFlowField& flowField, int i, int j, int k) ;
+    void applyFrontWall(TurbulentFlowField& flowField, int i, int j, int k) ;
+    void applyBackWall(TurbulentFlowField& flowField, int i, int j, int k) ;
 };
 } // namespace Stencils

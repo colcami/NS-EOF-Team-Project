@@ -6,6 +6,7 @@
 #include "StencilFunctions.hpp"
 #include "WallDistanceStencil.hpp"
 #include "TurbulentFlowField.hpp"
+#include "BoundaryStencil.hpp"
 
 
 /** Stencil for computing turbulent viscosity (nuT) using Prandtl's mixing length model.
@@ -17,9 +18,8 @@ namespace Stencils{
 class NuTurbulentStencil : public FieldStencil<TurbulentFlowField> {
 private:
     /** Computes the shear rate tensor magnitude S_ij S_ij */
-    // RealType computeShearRate(const RealType* lv, const RealType* lm) const;
-
-    // RealType interpolateVelocityToCellCenter(TurbulentFlowField& flowField, int i, int j, int k) const;
+    RealType localVelocity_[27*3];
+    RealType localMeshSize_[27*3];
     
     /** Computes the boundary layer thickness delta */
     RealType computeBoundaryLayerThickness(RealType x, RealType U, RealType nu) const;

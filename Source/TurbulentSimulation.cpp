@@ -18,7 +18,10 @@ TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowFi
   NuTurbulentStencil_(parameters),
   NuTurbulentIterator_(TflowField, parameters, NuTurbulentStencil_),
   vtkTurbulentViscosityStencil_(parameters),
-  vtkTurbulentViscosityIterator_(TflowField, parameters, vtkTurbulentViscosityStencil_)
+  vtkTurbulentViscosityIterator_(TflowField, parameters, vtkTurbulentViscosityStencil_),
+  timeStepStencil_(parameters),
+  timeStepFieldIterator_(TflowField, parameters, timeStepStencil_),
+  timeStepBoundaryIterator_(TflowField, parameters, timeStepStencil_)
 {
 }
 
@@ -58,7 +61,7 @@ void TurbulentSimulation::initializeFlowField() {
     FieldIterator<FlowField>    iterator(flowField_, parameters_, stencil, 0, 1);
     iterator.iterate();
   }
-
+  wallDistanceIterator_.iterate();
   solver_->reInitMatrix();
 }
 
@@ -78,8 +81,7 @@ void TurbulentSimulation::solveTimestep() {
   velocityIterator_.iterate();
   obstacleIterator_.iterate();
 // Apply the wall distance stencil  
-  wallDistanceIterator_.iterate();
-  // NuTurbulentIterator_.iterate();
+  NuTurbulentIterator_.iterate();
   // TODO WS2: communicate velocity values
   // Iterate for velocities on the boundary
   wallVelocityIterator_.iterate();
@@ -106,6 +108,9 @@ void TurbulentSimulation::setTimeStep() {
   maxUStencil_.reset();
   maxUFieldIterator_.iterate();
   maxUBoundaryIterator_.iterate();
+  timeStepStencil_.reset();
+  timeStepFieldIterator_.iterate();
+  timeStepBoundaryIterator_.iterate();
   if (parameters_.geometry.dim == 3) {
     factor += 1.0 / (parameters_.meshsize->getDzMin() * parameters_.meshsize->getDzMin());
     parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[2]);

@@ -4,22 +4,8 @@
 #include <cmath>
 
 namespace Stencils{
-
 NuTurbulentStencil::NuTurbulentStencil(const Parameters& parameters)
     : FieldStencil<TurbulentFlowField>(parameters) {}
-
-// Compute the shear rate tensor magnitude (Sij Sij)
-
-// Interpolate velocity to the cell center
-// RealType NuTurbulentStencil::interpolateVelocityToCellCenter(FlowField& flowField, int i, int j, int k) const {
-//     RealType u = 0.5 * (flowField.getVelocity().getVector(i, j, k)[0] +
-//                         flowField.getVelocity().getVector(i - 1, j, k)[0]);
-//     RealType v = 0.5 * (flowField.getVelocity().getVector(i, j, k)[1] +
-//                         flowField.getVelocity().getVector(i, j - 1, k)[1]);
-//     RealType w = 0.5 * (flowField.getVelocity().getVector(i, j, k)[2] +
-//                         flowField.getVelocity().getVector(i, j, k - 1)[2]);
-//     return std::sqrt(u * u + v * v + w * w); // Magnitude of velocity at cell center
-// }
 
 // Compute the boundary layer thickness delta
 //! check if div/0
@@ -61,12 +47,10 @@ void NuTurbulentStencil::apply(TurbulentFlowField& flowField, int i, int j) {
     RealType lmScale = std::min(parameters_.turbulenceModel.kappa * h, parameters_.turbulenceModel.c0 * delta);
 
     // Compute shear rate
-    RealType localVelocity[27*3];
-    RealType localMeshSize[27*3];
-    loadLocalVelocity2D(flowField, localVelocity, i, j);
-    loadLocalMeshsize2D(parameters_, localMeshSize, i, j);
+    loadLocalVelocity2D(flowField, localVelocity_, i, j);
+    loadLocalMeshsize2D(parameters_, localMeshSize_, i, j);
 
-    RealType shearRate = computeShearRate(localVelocity, localMeshSize);
+    RealType shearRate = computeShearRate(localVelocity_, localMeshSize_);
 
     // Compute turbulent viscosity
     RealType nuT = lmScale * lmScale * shearRate;
@@ -93,12 +77,10 @@ void NuTurbulentStencil::apply(TurbulentFlowField& flowField, int i, int j, int 
     RealType lmScale = std::min(parameters_.turbulenceModel.kappa * h, parameters_.turbulenceModel.c0 * delta);
 
     // Compute shear rate
-    RealType localVelocity[27*3];
-    RealType localMeshSize[27*3];
-    loadLocalVelocity3D(flowField, localVelocity, i, j, k);
-    loadLocalMeshsize3D(parameters_, localMeshSize, i, j, k);
+    loadLocalVelocity3D(flowField, localVelocity_, i, j, k);
+    loadLocalMeshsize3D(parameters_, localMeshSize_, i, j, k);
 
-    RealType shearRate = computeShearRate(localVelocity, localMeshSize);
+    RealType shearRate = computeShearRate(localVelocity_, localMeshSize_);
 
     // Compute turbulent viscosity
     RealType nuT = lmScale * lmScale * shearRate;

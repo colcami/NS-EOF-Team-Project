@@ -34,8 +34,7 @@ void WallDistanceStencil::detectScenario() {
     }
 }
 
-// Apply stencil for 2D or 3D cases
-void WallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j) {
+void WallDistanceStencil::Distance(TurbulentFlowField& flowField, int i, int j){
     RealType x = parameters_.meshsize->getPosX(i, j);
     RealType y = parameters_.meshsize->getPosY(i, j);
 
@@ -87,7 +86,7 @@ void WallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j) {
     flowField.getWallDistance().getScalar(i, j) = distance;
 }
 
-void WallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j, int k) {
+void WallDistanceStencil::Distance(TurbulentFlowField& flowField, int i, int j, int k){
     RealType x = parameters_.meshsize->getPosX(i, j, k);
     RealType y = parameters_.meshsize->getPosY(i, j, k);
     RealType z = parameters_.meshsize->getPosZ(i, j, k);
@@ -152,5 +151,36 @@ void WallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j, int
     flowField.getWallDistance().getScalar(i, j, k) = distance;
 }
 
-} // namespace Stencils
+// Apply stencil for 2D or 3D cases
+  void WallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j) { Distance(flowField, i, j) ;}
+
+  void WallDistanceStencil::apply(TurbulentFlowField& flowField, int i, int j, int k) {Distance(flowField, i, j) ;}
+
+  void WallDistanceStencil::applyLeftWall(TurbulentFlowField& flowField, int i, int j)  { Distance(flowField, i, j) ;}
+  
+  void WallDistanceStencil::applyRightWall(TurbulentFlowField& flowField, int i, int j) { Distance(flowField, i, j) ;}
+  
+  void WallDistanceStencil::applyBottomWall(TurbulentFlowField& flowField, int i, int j) { Distance(flowField, i, j) ;}
+  
+  void WallDistanceStencil::applyTopWall(TurbulentFlowField& flowField, int i, int j) { Distance(flowField, i, j) ;}
+  
+  void WallDistanceStencil::applyLeftWall(TurbulentFlowField& flowField, int i, int j, int k) 
+  { Distance(flowField, i, j, k) ;}
+  
+  void WallDistanceStencil::applyRightWall(TurbulentFlowField& flowField, int i, int j, int k) 
+  { Distance(flowField, i, j, k) ;}
+  
+  void WallDistanceStencil::applyBottomWall(TurbulentFlowField& flowField, int i, int j, int k) 
+  { Distance(flowField, i, j, k) ;}
+  
+  void WallDistanceStencil::applyTopWall(TurbulentFlowField& flowField, int i, int j, int k) 
+  { Distance(flowField, i, j, k) ;}
+  
+  void WallDistanceStencil::applyFrontWall(TurbulentFlowField& flowField, int i, int j, int k) 
+  { Distance(flowField, i, j, k) ;}
+  
+  void WallDistanceStencil::applyBackWall(TurbulentFlowField& flowField, int i, int j, int k) 
+  { Distance(flowField, i, j, k) ;}  
+    
+}// namespace Stencils
 
