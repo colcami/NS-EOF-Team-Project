@@ -26,6 +26,7 @@
 #include "Stencils/VTKWallDistanceStencil.hpp"
 #include "Stencils/WallDistanceStencil.hpp"
 #include "Stencils/TimeStepStencil.hpp"
+#include "Stencils/BoundaryStencil.hpp"
 
 class TurbulentSimulation : public Simulation {
 protected:
@@ -50,7 +51,7 @@ protected:
 
   Stencils::TimeStepStencil          timeStepStencil_;
   FieldIterator<TurbulentFlowField>  timeStepFieldIterator_;
-  GlobalBoundaryIterator<FlowField>  timeStepBoundaryIterator_;
+  GlobalBoundaryIterator<TurbulentFlowField>  timeStepBoundaryIterator_;
 
   
   void setTimeStep() override;

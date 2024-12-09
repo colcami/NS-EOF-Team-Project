@@ -4,6 +4,8 @@
 
 #include "Solvers/PetscSolver.hpp"
 #include "Solvers/SORSolver.hpp"
+#include "TimeStepStencil.hpp"
+#include "BoundaryStencil.hpp"
 
 TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowField& TflowField):
   Simulation(parameters, TflowField),

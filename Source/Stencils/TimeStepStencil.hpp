@@ -5,7 +5,7 @@
 #include "Parameters.hpp"
 
 namespace Stencils{
-  class TimeStepStencil : public FieldStencil<TurbulentFlowField> {
+  class TimeStepStencil : public FieldStencil<TurbulentFlowField>, public BoundaryStencil<TurbulentFlowField> {
     private:
       RealType min_dt_;
 
