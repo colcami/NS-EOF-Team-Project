@@ -3,6 +3,8 @@
 #include "FieldStencil.hpp"
 #include "TurbulentFlowField.hpp"
 #include "Parameters.hpp"
+#include "BoundaryStencil.hpp"
+#include "Definitions.hpp"
 
 namespace Stencils{
   class TimeStepStencil : public FieldStencil<TurbulentFlowField>, public BoundaryStencil<TurbulentFlowField> {
