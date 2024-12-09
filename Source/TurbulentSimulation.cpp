@@ -79,7 +79,7 @@ void TurbulentSimulation::solveTimestep() {
   obstacleIterator_.iterate();
 // Apply the wall distance stencil  
   wallDistanceIterator_.iterate();
-  NuTurbulentIterator_.iterate();
+  // NuTurbulentIterator_.iterate();
   // TODO WS2: communicate velocity values
   // Iterate for velocities on the boundary
   wallVelocityIterator_.iterate();

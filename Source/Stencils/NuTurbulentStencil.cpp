@@ -66,7 +66,7 @@ void NuTurbulentStencil::apply(TurbulentFlowField& flowField, int i, int j) {
     loadLocalVelocity2D(flowField, localVelocity, i, j);
     loadLocalMeshsize2D(parameters_, localMeshSize, i, j);
 
-    RealType shearRate = computeShearRate(localVelocity, localVelocity);
+    RealType shearRate = computeShearRate(localVelocity, localMeshSize);
 
     // Compute turbulent viscosity
     RealType nuT = lmScale * lmScale * shearRate;
@@ -98,7 +98,7 @@ void NuTurbulentStencil::apply(TurbulentFlowField& flowField, int i, int j, int 
     loadLocalVelocity3D(flowField, localVelocity, i, j, k);
     loadLocalMeshsize3D(parameters_, localMeshSize, i, j, k);
 
-    RealType shearRate = computeShearRate(localVelocity, localVelocity);
+    RealType shearRate = computeShearRate(localVelocity, localMeshSize);
 
     // Compute turbulent viscosity
     RealType nuT = lmScale * lmScale * shearRate;

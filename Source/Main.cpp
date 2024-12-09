@@ -94,6 +94,7 @@ int main(int argc, char* argv[]) {
     if (rank == 0) {
       spdlog::info("Start Turbulence simulation in {}D", parameters.geometry.dim);
     }
+      spdlog::info("starting flowfield init");
     flowField = std::make_unique<TurbulentFlowField>(parameters);
     if (flowField == NULL) {
       throw std::runtime_error("flowField == NULL!");
