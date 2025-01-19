@@ -24,7 +24,11 @@ private:
 
   VectorField FGH_;
   ScalarField RHS_; //! Right hand side for the Poisson equation
-
+  // New turbulence fields
+  // ScalarField h_;    //! Scalar field for the nearest wall distance
+  // ScalarField nu_t_; //! Scalar field for the turbulent viscosity
+  // ScalarField nu_star_; //! Scalar field for the total viscosity
+  
 public:
   /** Constructor for the 2D flow field
    *
@@ -89,6 +93,11 @@ public:
 
   ScalarField& getRHS();
 
+  // New getters for turbulence fields
+  // ScalarField& getWallDistance();
+  // ScalarField& getTurbulentViscosity();
+  // ScalarField& getTotalViscosity();
+  
   void getPressureAndVelocity(RealType& pressure, RealType* const velocity, int i, int j);
   void getPressureAndVelocity(RealType& pressure, RealType* const velocity, int i, int j, int k);
 };

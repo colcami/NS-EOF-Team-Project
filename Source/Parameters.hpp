@@ -3,6 +3,11 @@
 #include "BoundaryType.hpp"
 #include "Definitions.hpp"
 #include "Meshsize.hpp"
+#include <string>
+#include <petsc.h>
+#include <mpi.h>
+// #include <petscsys.h>
+#include "StdAfx.hpp"
 
 //! Classes for the parts of the parameters
 //@{
@@ -133,7 +138,13 @@ public:
   RealType yRatio = 0;
 };
 
-//@}
+class TurbulenceModelParameters {
+public:
+  std::string type;    //! Type of turbulence model (e.g., "mixing-length")
+  RealType kappa = 0.41;  //! von Kármán constant
+  RealType c0 = 0;     //! Constant for delta scaling
+  std::string boundaryLayerType; //! Boundary layer type ("none", "laminar", "turbulent");
+};
 
 /** A class to store and pass around the parameters
  */
@@ -154,5 +165,6 @@ public:
   StdOutParameters        stdOut;
   BFStepParameters        bfStep;
   // TODO WS2: include parameters for turbulence
+  TurbulenceModelParameters turbulenceModel;
   Meshsize* meshsize;
 };

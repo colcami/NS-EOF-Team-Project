@@ -16,7 +16,10 @@ FlowField::FlowField(int Nx, int Ny):
   velocity_(VectorField(Nx + 3, Ny + 3)),
   flags_(IntScalarField(Nx + 3, Ny + 3)),
   FGH_(VectorField(Nx + 3, Ny + 3)),
-  RHS_(ScalarField(Nx + 3, Ny + 3)) {
+  RHS_(ScalarField(Nx + 3, Ny + 3)){
+  // h_(ScalarField(Nx + 3, Ny + 3)){
+  // nu_t_(ScalarField(Nx + 3, Ny + 3)),
+  // nu_star_(ScalarField(Nx + 3, Ny + 3)) 
 
   ASSERTION(Nx > 0);
   ASSERTION(Ny > 0);
@@ -33,7 +36,10 @@ FlowField::FlowField(int Nx, int Ny, int Nz):
   velocity_(VectorField(Nx + 3, Ny + 3, Nz + 3)),
   flags_(IntScalarField(Nx + 3, Ny + 3, Nz + 3)),
   FGH_(VectorField(Nx + 3, Ny + 3, Nz + 3)),
-  RHS_(ScalarField(Nx + 3, Ny + 3, Nz + 3)) {
+  RHS_(ScalarField(Nx + 3, Ny + 3, Nz + 3)){
+  // h_(ScalarField(Nx + 3, Ny + 3, Nz + 3)),
+  // nu_t_(ScalarField(Nx + 3, Ny + 3, Nz + 3)),
+  // nu_star_(ScalarField(Nx + 3, Ny + 3, Nz + 3)) {
 
   ASSERTION(Nx > 0);
   ASSERTION(Ny > 0);
@@ -62,8 +68,17 @@ FlowField::FlowField(const Parameters& parameters):
     parameters.geometry.dim == 2 ? VectorField(sizeX_ + 3, sizeY_ + 3) : VectorField(sizeX_ + 3, sizeY_ + 3, sizeZ_ + 3)
   ),
   RHS_(
-    parameters.geometry.dim == 2 ? ScalarField(sizeX_ + 3, sizeY_ + 3) : ScalarField(sizeX_ + 3, sizeY_ + 3, sizeZ_ + 3)
-  ) {}
+      parameters.geometry.dim == 2 ? ScalarField(sizeX_ + 3, sizeY_ + 3) : ScalarField(sizeX_ + 3, sizeY_ + 3, sizeZ_ + 3)
+  ){}
+  // h_(
+  //   parameters.geometry.dim == 2 ? ScalarField(sizeX_ + 3, sizeY_ + 3) : ScalarField(sizeX_ + 3, sizeY_ + 3, sizeZ_ + 3)
+  // ),
+  // nu_t_(
+  //   parameters.geometry.dim == 2 ? ScalarField(sizeX_ + 3, sizeY_ + 3) : ScalarField(sizeX_ + 3, sizeY_ + 3, sizeZ_ + 3)
+  // ),
+  // nu_star_(
+  //   parameters.geometry.dim == 2 ? ScalarField(sizeX_ + 3, sizeY_ + 3) : ScalarField(sizeX_ + 3, sizeY_ + 3, sizeZ_ + 3)
+  // ){}
 
 int FlowField::getNx() const { return sizeX_; }
 
@@ -86,6 +101,12 @@ IntScalarField& FlowField::getFlags() { return flags_; }
 VectorField& FlowField::getFGH() { return FGH_; }
 
 ScalarField& FlowField::getRHS() { return RHS_; }
+
+// ScalarField& FlowField::getWallDistance() { return h_; }
+
+// ScalarField& FlowField::getTurbulentViscosity() { return nu_t_; }
+
+// ScalarField& FlowField::getTotalViscosity() { return nu_star_; }
 
 void FlowField::getPressureAndVelocity(RealType& pressure, RealType* const velocity, int i, int j) {
   RealType* vHere = getVelocity().getVector(i, j);

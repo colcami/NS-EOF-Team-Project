@@ -2,6 +2,10 @@
 
 #include "Assertion.hpp"
 #include "Definitions.hpp"
+#include <iostream>
+#include <cstddef> // For NULL
+#include <stdexcept> // For std::runtime_error
+#include <string> // For std::string
 
 /** Storage of a scalar field
  *

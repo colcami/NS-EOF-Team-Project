@@ -4,11 +4,14 @@
 #include "Configuration.hpp"
 #include "MeshsizeFactory.hpp"
 #include "Simulation.hpp"
+#include "TurbulentFlowField.hpp"
+#include "TurbulentSimulation.hpp"
 
 
 #include "ParallelManagers/PetscParallelConfiguration.hpp"
 
 #include <fenv.h>
+#include <memory>
 
 void enableFloatingPointExceptions() {
     // Enable FE_DIVBYZERO, FE_OVERFLOW, FE_UNDERFLOW, and FE_INVALID exceptions
@@ -62,8 +65,8 @@ int main(int argc, char* argv[]) {
   configuration.loadParameters(parameters);
   ParallelManagers::PetscParallelConfiguration parallelConfiguration(parameters);
   MeshsizeFactory::getInstance().initMeshsize(parameters);
-  FlowField*  flowField  = NULL;
-  Simulation* simulation = NULL;
+  std::unique_ptr<FlowField> flowField;
+  std::unique_ptr<Simulation> simulation;
 
   spdlog::debug(
     "Processor {} with index {}, {}, {} is computing the size of its subdomain and obtains {}, {} and {}.",
@@ -88,15 +91,26 @@ int main(int argc, char* argv[]) {
   // Initialise simulation
   if (parameters.simulation.type == "turbulence") {
     // TODO WS2: initialise turbulent flow field and turbulent simulation object
+    if (rank == 0) {
+      spdlog::info("Start Turbulence simulation in {}D", parameters.geometry.dim);
+    }
+      spdlog::info("starting flowfield init");
+    flowField = std::make_unique<TurbulentFlowField>(parameters);
+    if (flowField == NULL) {
+      throw std::runtime_error("flowField == NULL!");
+    }
+    simulation = std::make_unique<TurbulentSimulation>(parameters, *dynamic_cast<TurbulentFlowField*>(flowField.get()));
+
   } else if (parameters.simulation.type == "dns") {
     if (rank == 0) {
       spdlog::info("Start DNS simulation in {}D", parameters.geometry.dim);
     }
-    flowField = new FlowField(parameters);
+    flowField = std::make_unique<FlowField>(parameters);
     if (flowField == NULL) {
       throw std::runtime_error("flowField == NULL!");
     }
-    simulation = new Simulation(parameters, *flowField);
+    simulation = std::make_unique<Simulation>(parameters, *flowField);
+    
   } else {
     throw std::runtime_error("Unknown simulation type! Currently supported: dns, turbulence");
   }
@@ -139,11 +153,9 @@ int main(int argc, char* argv[]) {
 
   // Plot final solution
   simulation->plotVTK(timeSteps, time);
-
-  delete simulation;
+  
   simulation = NULL;
 
-  delete flowField;
   flowField = NULL;
 
 #ifdef ENABLE_PETSC

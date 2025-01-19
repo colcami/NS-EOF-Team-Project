@@ -1,5 +1,10 @@
 #pragma once
 
+#include <string>  // For std::string
+#include <sstream> // For std::stringstream
+#include <utility> // For std::forward
+#include <cassert>
+
 struct Assertion {
   static bool throwAssertionException;
 

@@ -395,6 +395,36 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
 
     //------------------------------------------------------
     // TODO WS2: Turbulence
+        //--------------------------------------------------
+// Turbulence parameters
+//--------------------------------------------------
+/* node = confFile.FirstChildElement()->FirstChildElement("turbulenceModel");
+
+if (node == NULL) {
+    throw std::runtime_error("Error loading turbulence model parameters");
+}
+
+// Read turbulence model type
+readStringMandatory(parameters.turbulenceModel.type, node);
+
+// Read turbulence constants
+tinyxml2::XMLElement* subNode = node->FirstChildElement("parameters");
+if (subNode == NULL) {
+    throw std::runtime_error("Missing 'parameters' in turbulenceModel");
+}
+ */
+// Read kappa, c0, and deltaType
+/* readFloatMandatory(parameters.turbulenceModel.kappa, subNode, "kappa");
+readFloatMandatory(parameters.turbulenceModel.c0, subNode, "c0");
+readStringMandatory(parameters.turbulenceModel.boundaryLayerType, subNode); */
+
+// Validate deltaType
+/* if (parameters.turbulenceModel.boundaryLayerType != "none" &&
+    parameters.turbulenceModel.boundaryLayerType != "laminar" &&
+    parameters.turbulenceModel.boundaryLayerType != "turbulent") {
+    throw std::runtime_error("Invalid boundaryLayerType in turbulenceModel");
+} */
+
     //------------------------------------------------------
   }
 

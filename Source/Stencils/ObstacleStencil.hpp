@@ -13,8 +13,11 @@ namespace Stencils {
     ObstacleStencil(const Parameters& parameters);
     ~ObstacleStencil() override = default;
 
-    void apply(FlowField& flowField, int i, int j) override;
-    void apply(FlowField& flowField, int i, int j, int k) override;
+    // Apply existing no-slip conditions and compute minimal distances
+    void apply(FlowField& flowField, int i, int j) override;       // For 2D
+    void apply(FlowField& flowField, int i, int j, int k) override; // For 3D
+
+    
   };
 
 } // namespace Stencils

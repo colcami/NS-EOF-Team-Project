@@ -1,9 +1,14 @@
 #include "StdAfx.hpp"
 
 #include "ObstacleStencil.hpp"
+#include <cmath>
+#include <limits>
 
-Stencils::ObstacleStencil::ObstacleStencil(const Parameters& parameters):
+namespace Stencils {
+
+ObstacleStencil::ObstacleStencil(const Parameters& parameters):
   FieldStencil<FlowField>(parameters) {}
+
 
 void Stencils::ObstacleStencil::apply(FlowField& flowField, int i, int j) {
   const int    obstacle = flowField.getFlags().getValue(i, j);
@@ -45,8 +50,11 @@ void Stencils::ObstacleStencil::apply(FlowField& flowField, int i, int j) {
     if ((obstacle & OBSTACLE_TOP) == 0) {
       velocity.getVector(i, j)[1] = 0.0;
     }
+  
   }
 }
+
+
 
 void Stencils::ObstacleStencil::apply(FlowField& flowField, int i, int j, int k) {
   const int    obstacle = flowField.getFlags().getValue(i, j);
@@ -107,4 +115,6 @@ void Stencils::ObstacleStencil::apply(FlowField& flowField, int i, int j, int k)
       velocity.getVector(i, j, k)[2] = 0.0;
     }
   }
+
+    }
 }

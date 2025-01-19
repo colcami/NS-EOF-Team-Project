@@ -1,48 +1,35 @@
 #include "StdAfx.hpp"
 
-#include "Simulation.hpp"
+#include "TurbulentSimulation.hpp"
 
 #include "Solvers/PetscSolver.hpp"
 #include "Solvers/SORSolver.hpp"
-#include "spdlog/spdlog.h"
-#include "Stencils/WallDistanceStencil.hpp"
-#include "Stencils/VTKWallDistanceStencil.hpp"
 
-Simulation::Simulation(Parameters& parameters, FlowField& flowField):
-  parameters_(parameters),
-  flowField_(flowField),
-  maxUStencil_(parameters),
-  maxUFieldIterator_(flowField_, parameters, maxUStencil_),
-  maxUBoundaryIterator_(flowField_, parameters, maxUStencil_),
-  globalBoundaryFactory_(parameters),
-  wallVelocityIterator_(globalBoundaryFactory_.getGlobalBoundaryVelocityIterator(flowField_)),
-  wallFGHIterator_(globalBoundaryFactory_.getGlobalBoundaryFGHIterator(flowField_)),
-  fghStencil_(parameters),
-  fghIterator_(flowField_, parameters, fghStencil_),
-  rhsStencil_(parameters),
-  rhsIterator_(flowField_, parameters, rhsStencil_),
-  velocityStencil_(parameters),
-  obstacleStencil_(parameters),
-  velocityIterator_(flowField_, parameters, velocityStencil_),
-  obstacleIterator_(flowField_, parameters, obstacleStencil_),
-  petscParallelManager_(parameters, flowField_)
-
-#ifdef ENABLE_PETSC
-  ,
-  solver_(std::make_unique<Solvers::PetscSolver>(flowField_, parameters))
-#else
-  ,
-  solver_(std::make_unique<Solvers::SORSolver>(flowField_, parameters))
-#endif
-
+TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowField& TflowField):
+  Simulation(parameters, TflowField),
+  flowField_(TflowField),
+  // ! FGH STENCIL
+  TfghStencil_(parameters),
+  fghIterator_(flowField_, parameters, TfghStencil_),
+  wallDistanceStencil_(parameters),
+  wallDistanceIterator_(TflowField, parameters, wallDistanceStencil_),
+  vtkWallDistanceStencil_(parameters),
+  vtkWallDistanceIterator_(TflowField, parameters, vtkWallDistanceStencil_),
+  NuTurbulentStencil_(parameters),
+  NuTurbulentIterator_(TflowField, parameters, NuTurbulentStencil_),
+  vtkTurbulentViscosityStencil_(parameters),
+  vtkTurbulentViscosityIterator_(TflowField, parameters, vtkTurbulentViscosityStencil_),
+  timeStepStencil_(parameters),
+  timeStepFieldIterator_(TflowField, parameters, timeStepStencil_),
+  timeStepBoundaryIterator_(TflowField, parameters, timeStepStencil_)
 {
 }
 
-void Simulation::initializeFlowField() {
+void TurbulentSimulation::initializeFlowField() {
   if (parameters_.simulation.scenario == "taylor-green") {
     // Currently, a particular initialisation is only required for the taylor-green vortex.
     Stencils::InitTaylorGreenFlowFieldStencil stencil(parameters_);
-    FieldIterator<FlowField>                  iterator(flowField_, parameters_, stencil);
+    FieldIterator<FlowField>         iterator(flowField_, parameters_, stencil);
     iterator.iterate();
   } else if (parameters_.simulation.scenario == "channel") {
     Stencils::BFStepInitStencil stencil(parameters_);
@@ -74,15 +61,16 @@ void Simulation::initializeFlowField() {
     FieldIterator<FlowField>    iterator(flowField_, parameters_, stencil, 0, 1);
     iterator.iterate();
   }
-
+  wallDistanceIterator_.iterate();
   solver_->reInitMatrix();
-
 }
 
-void Simulation::solveTimestep() {
+void TurbulentSimulation::solveTimestep() {
   // Determine and set max. timestep which is allowed in this simulation
   setTimeStep();
-  // Compute FGH
+  // Compute FGH //! FGH 
+  std::cout << "hello" << std::endl;
+  NuTurbulentIterator_.iterate();
   fghIterator_.iterate();
   // Set global boundary values
   wallFGHIterator_.iterate();
@@ -91,27 +79,27 @@ void Simulation::solveTimestep() {
   // Solve for pressure
   solver_->solve();
   // TODO WS2: communicate pressure values
-  spdlog::debug("Communicating pressure");
-  petscParallelManager_.communicatePressure();
   // Compute velocity
   velocityIterator_.iterate();
   obstacleIterator_.iterate();
+// Apply the wall distance stencil  
   // TODO WS2: communicate velocity values
-  spdlog::debug("Communicating velocity");
-  petscParallelManager_.communicateVelocities();
   // Iterate for velocities on the boundary
   wallVelocityIterator_.iterate();
 }
 
-void Simulation::plotVTK(int timeStep, RealType simulationTime) {
+void TurbulentSimulation::plotVTK(int timeStep, RealType simulationTime) {
   Stencils::VTKStencil     vtkStencil(parameters_);
   FieldIterator<FlowField> vtkIterator(flowField_, parameters_, vtkStencil, 1, 0);
+
   vtkIterator.iterate();
   vtkStencil.write(flowField_, timeStep, simulationTime);
-  
+
+  vtkWallDistanceIterator_.iterate();
+  vtkWallDistanceStencil_.write(flowField_, timeStep, simulationTime);
 }
 
-void Simulation::setTimeStep() {
+void TurbulentSimulation::setTimeStep() {
   RealType localMin, globalMin;
   ASSERTION(parameters_.geometry.dim == 2 || parameters_.geometry.dim == 3);
   RealType factor = 1.0 / (parameters_.meshsize->getDxMin() * parameters_.meshsize->getDxMin())
@@ -120,6 +108,9 @@ void Simulation::setTimeStep() {
   maxUStencil_.reset();
   maxUFieldIterator_.iterate();
   maxUBoundaryIterator_.iterate();
+  timeStepStencil_.reset();
+  timeStepFieldIterator_.iterate();
+  timeStepBoundaryIterator_.iterate();
   if (parameters_.geometry.dim == 3) {
     factor += 1.0 / (parameters_.meshsize->getDzMin() * parameters_.meshsize->getDzMin());
     parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[2]);
@@ -127,10 +118,12 @@ void Simulation::setTimeStep() {
     parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[0]);
   }
 
+  RealType minimum_dt = timeStepStencil_.getdt();
+
   // localMin = std::min(parameters_.timestep.dt, std::min(std::min(parameters_.flow.Re/(2 * factor), 1.0 /
   // maxUStencil_.getMaxValues()[0]), 1.0 / maxUStencil_.getMaxValues()[1]));
   localMin = std::min(
-    parameters_.flow.Re / (2 * factor),
+    minimum_dt,
     std::min(
       parameters_.timestep.dt, std::min(1 / (maxUStencil_.getMaxValues()[0]), 1 / (maxUStencil_.getMaxValues()[1]))
     )

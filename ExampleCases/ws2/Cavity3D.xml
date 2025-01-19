@@ -1,32 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
-    <flow Re="100" />
-    <simulation finalTime="10.0" >
+    <flow Re="1000" />
+    <simulation finalTime="30" >
         <type>dns</type>
-        <scenario>channel</scenario>
+        <scenario>cavity</scenario>
     </simulation>
-    <backwardFacingStep xRatio="0.4" yRatio="0.5" />
     <timestep dt="1" tau="0.5" />
     <solver gamma="0.5" />
-    <geometry
-      dim="2"
-      lengthX="5.0" lengthY="2.0" lengthZ="1.0"
-      sizeX="200" sizeY="200" sizeZ="10"
-      stretchX="false" stretchY="true" stretchZ="true"
+    <geometry dim="3"
+      lengthX="1.0" lengthY="1.0" lengthZ="1.0"
+      sizeX="29" sizeY="29" sizeZ="29"
     >
-      <mesh>stretched</mesh>
-      <!--mesh>uniform</mesh-->
+      <mesh>uniform</mesh>
     </geometry>
     <environment gx="0" gy="0" gz="0" />
     <walls>
         <left>
-            <vector x="1.0" y="0" z="0" />
+            <vector x="0" y="0" z="0" />
         </left>
         <right>
             <vector x="0" y="0" z="0" />
         </right>
         <top>
-            <vector x="0.0" y="0." z="0." />
+            <vector x="1" y="0" z="0" />
         </top>
         <bottom>
             <vector x="0" y="0" z="0" />
@@ -38,10 +34,7 @@
             <vector x="0" y="0" z="0" />
         </back>
     </walls>
-    <boundaryLayer>
-    <type>laminar</type>
-    </boundaryLayer>
-    <vtk interval="0.1">ChannelBackwardFacingStep2D</vtk>
-    <stdOut interval="0.0001" />
+    <vtk interval="0.01">Cavity3D</vtk>
+    <stdOut interval="0.01" />
     <parallel numProcessorsX="1" numProcessorsY="1" numProcessorsZ="1" />
 </configuration>
