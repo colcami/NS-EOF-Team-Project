@@ -80,3 +80,15 @@ Instead of using `make test`, run `ctest --verbose`.
 ### WARNING! There are options you set that were not used! There are 2 unused database options.
 
 Just ignore these warnings. If you run the code in serial, PETSc does not require the two parameters for parallel runs and vice versa.
+
+---
+
+## Project Context & My Contributions
+
+This repository contains the **team version** of the NS-EOF parallel solver, developed as part of the **High-Performance Computing** course at TUM.
+
+### My Role
+- Implemented optimized velocity buffer communication (`cagatay_velocity_buffers` branch).
+- Assisted in performance testing and parallel HDF5 output handling.
+- Participated in MPI domain decomposition and solver validation.
+
